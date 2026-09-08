@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root {
+  --kimi-color-text-primary: #1a1a1a;
+  --kimi-color-text-secondary: #555555;
+  --kimi-color-text-tertiary: #888888;
+  --kimi-color-text-quaternary: #aaaaaa;
+  --kimi-color-surface: #ffffff;
+  --kimi-color-surface-muted: #f5f5f5;
+  --kimi-color-surface-strong: #eeeeee;
+  --kimi-color-surface-raised: #fafafa;
+  --kimi-color-border: #e0e0e0;
+  --kimi-color-accent: #2563eb;
+  --kimi-chart-1: #2563eb;
+  --kimi-font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --t-fast: 0.15s;
+  --t-normal: 0.25s;
+  font-family: var(--kimi-font-sans, system-ui, sans-serif);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { color: var(--kimi-color-text-primary); background: transparent; line-height: 1.5; }
+button, input, select, textarea { font: inherit; }
+svg text { font-family: var(--kimi-font-sans); }
+.container { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+/* Hero */
+.hero { text-align: center; padding: 48px 16px 32px; }
+.hero h1 { font-size: 36px; font-weight: 500; line-height: 1.1; letter-spacing: 0; margin-bottom: 12px; }
+.hero p { font-size: 17px; color: var(--kimi-color-text-secondary); font-weight: 400; max-width: 520px; margin: 0 auto 24px; }
+.hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--kimi-color-border); color: var(--kimi-color-text-tertiary); font-size: 13px; margin-bottom: 8px; }
+/* Nav */
+.nav { position: sticky; top: 0; z-index: 40; background: color-mix(in srgb, var(--kimi-color-surface) 92%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--kimi-color-border); }
+.nav-inner { display: flex; gap: 4px; padding: 8px 0; overflow-x: auto; scrollbar-width: none; }
+.nav-inner::-webkit-scrollbar { display: none; }
+.nav-btn { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; border: none; background: transparent; color: var(--kimi-color-text-secondary); font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background var(--t-fast), color var(--t-fast); }
+.nav-btn:hover { background: var(--kimi-color-surface-muted); color: var(--kimi-color-text-primary); }
+.nav-btn.active { background: var(--kimi-color-surface-strong); color: var(--kimi-color-text-primary); }
+/* Sections */
+.section { padding: 32px 0 24px; border-bottom: 1px solid var(--kimi-color-border); }
+.section:last-of-type { border-bottom: none; }
+.section-header { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.section-header h2 { font-size: 22px; font-weight: 500; }
+.section-header .count { font-size: 13px; color: var(--kimi-color-text-quaternary); font-weight: 400; margin-left: auto; }
+/* Grid */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+/* Card */
+.card { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 10px; border: 1px solid var(--kimi-color-border); background: var(--kimi-color-surface); cursor: pointer; transition: transform var(--t-fast), box-shadow var(--t-fast), border-color var(--t-fast); }
+.card:hover { transform: translateY(-2px); border-color: var(--kimi-color-text-quaternary); box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+.card-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; background: var(--kimi-color-surface-muted); color: var(--kimi-color-text-secondary); }
+.card-icon svg { width: 18px; height: 18px; }
+.card-title { font-size: 14px; font-weight: 500; color: var(--kimi-color-text-primary); line-height: 1.35; }
+.card-desc { font-size: 12px; color: var(--kimi-color-text-quaternary); line-height: 1.4; }
+/* Modal */
+.modal-overlay { position: fixed; inset: 0; z-index: 100; background: rgba(0,0,0,0.35); display: none; align-items: center; justify-content: center; padding: 16px; opacity: 0; transition: opacity var(--t-normal); }
+.modal-overlay.open { display: flex; opacity: 1; }
+.modal { width: 100%; max-width: 520px; max-height: 85vh; overflow-y: auto; background: var(--kimi-color-surface); border-radius: 12px; border: 1px solid var(--kimi-color-border); box-shadow: 0 20px 60px rgba(0,0,0,0.15); transform: translateY(12px) scale(0.98); transition: transform var(--t-normal); }
+.modal-overlay.open .modal { transform: translateY(0) scale(1); }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--kimi-color-border); position: sticky; top: 0; background: var(--kimi-color-surface); border-radius: 12px 12px 0 0; }
+.modal-header h3 { font-size: 17px; font-weight: 500; }
+.modal-close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: none; background: transparent; color: var(--kimi-color-text-secondary); cursor: pointer; }
+.modal-close:hover { background: var(--kimi-color-surface-muted); color: var(--kimi-color-text-primary); }
+.modal-body { padding: 20px; }
+/* Form elements */
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 500; color: var(--kimi-color-text-secondary); margin-bottom: 6px; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--kimi-color-border); background: var(--kimi-color-surface-muted); color: var(--kimi-color-text-primary); font-size: 14px; outline: none; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--kimi-color-text-primary); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; border-radius: 8px; border: none; background: var(--kimi-color-text-primary); color: var(--kimi-color-surface); font-size: 14px; font-weight: 500; cursor: pointer; transition: opacity var(--t-fast); }
+.btn-primary:hover { opacity: 0.85; }
+.btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; border-radius: 8px; border: 1px solid var(--kimi-color-border); background: transparent; color: var(--kimi-color-text-primary); font-size: 14px; font-weight: 500; cursor: pointer; }
+.btn-secondary:hover { background: var(--kimi-color-surface-muted); }
+.result-box { padding: 14px; border-radius: 8px; background: var(--kimi-color-surface-muted); border: 1px solid var(--kimi-color-border); margin-top: 12px; font-size: 14px; line-height: 1.5; }
+.result-box .label { font-size: 12px; color: var(--kimi-color-text-quaternary); margin-bottom: 4px; }
+.result-box .value { font-size: 18px; font-weight: 500; color: var(--kimi-color-text-primary); font-variant-numeric: tabular-nums; }
+.result-box .sub { font-size: 13px; color: var(--kimi-color-text-secondary); margin-top: 4px; }
+/* Canvas */
+canvas.graph { width: 100%; height: 220px; background: var(--kimi-color-surface-muted); border-radius: 8px; border: 1px solid var(--kimi-color-border); margin-top: 12px; }
+/* Info block */
+.info-block { padding: 16px; border-radius: 10px; background: color-mix(in srgb, var(--kimi-color-accent) 6%, transparent); border: 1px solid color-mix(in srgb, var(--kimi-color-accent) 15%, transparent); margin-bottom: 16px; }
+.info-block h4 { font-size: 14px; font-weight: 500; margin-bottom: 6px; color: var(--kimi-color-text-primary); }
+.info-block p { font-size: 13px; color: var(--kimi-color-text-secondary); line-height: 1.5; }
+/* Support */
+.support-section { text-align: center; padding: 40px 16px; }
+.support-section h2 { font-size: 24px; font-weight: 500; margin-bottom: 8px; }
+.support-section p { color: var(--kimi-color-text-secondary); font-size: 15px; margin-bottom: 20px; max-width: 480px; margin-left: auto; margin-right: auto; }
+/* Footer */
+.footer { padding: 32px 16px; border-top: 1px solid var(--kimi-color-border); text-align: center; }
+.footer p { color: var(--kimi-color-text-quaternary); font-size: 13px; line-height: 1.6; max-width: 640px; margin: 0 auto; }
+.footer .links { display: flex; justify-content: center; gap: 16px; margin-top: 12px; }
+.footer a { color: var(--kimi-color-text-secondary); font-size: 13px; text-decoration: none; }
+.footer a:hover { color: var(--kimi-color-text-primary); text-decoration: underline; }
+/* Scroll top */
+.scroll-top { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--kimi-color-border); background: var(--kimi-color-surface); color: var(--kimi-color-text-secondary); display: none; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.06); z-index: 50; }
+.scroll-top:hover { color: var(--kimi-color-text-primary); background: var(--kimi-color-surface-raised); }
+/* Tags */
+.tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; background: var(--kimi-color-surface-muted); color: var(--kimi-color-text-tertiary); margin-right: 4px; }
+/* Responsive */
+@media (max-width: 640px) {
+.hero h1 { font-size: 28px; }
+.grid { grid-template-columns: 1fr; }
+.form-row { grid-template-columns: 1fr; }
+}
+</head>
+<body>
+<div class="container">
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-badge">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color:var(--kimi-color-text-secondary)"><path d="M12 2.1001C17.4676 2.10031 21.8994 6.53286 21.8994 12.0005C21.8992 17.4679 17.4674 21.8997 12 21.8999C6.53237 21.8999 2.09982 17.4681 2.09961 12.0005C2.09961 6.53273 6.53224 2.1001 12 2.1001ZM12 3.8999C7.52636 3.8999 3.89941 7.52684 3.89941 12.0005C3.89963 16.474 7.52649 20.1001 12 20.1001C16.4733 20.0999 20.0994 16.4738 20.0996 12.0005C20.0996 7.52697 16.4735 3.90011 12 3.8999ZM12 9.50049C12.4969 9.50068 12.8994 9.87055 12.8994 10.3267V16.6743C12.8992 17.1303 12.4968 17.5003 12 17.5005C11.503 17.5005 11.0998 17.1304 11.0996 16.6743V10.3267C11.0996 9.87043 11.5029 9.50049 12 9.50049ZM12 6.49951C12.4968 6.49951 12.8994 6.90313 12.8994 7.3999C12.8992 7.8965 12.4966 8.30029 12 8.30029C11.5025 8.30028 11.0998 7.8965 11.0996 7.3999C11.0996 6.90313 11.5024 6.49952 12 6.49951Z" fill="currentColor"/></svg>
+    Без регистрации · Бесплатно · Работает в браузере
+  </div>
+  <h1>Учебный Центр</h1>
+  <p>Этот сайт сделает вашу учёбу легче. Интерактивные калькуляторы и симуляторы по математике, физике и информатике.</p>
+</div>
+<!-- Nav -->
+<div class="nav">
+  <div class="container">
+    <div class="nav-inner">
+      <button class="nav-btn active" onclick="scrollToId('math')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10.2414 6.20491C10.7108 3.80117 13.895 3.23962 15.1584 5.33772C15.4147 5.76355 15.2776 6.31672 14.8518 6.57307C14.426 6.82914 13.8728 6.69208 13.6164 6.26643C13.2032 5.57996 12.1618 5.76338 12.008 6.54964L11.6243 8.51546H13.3332C13.8302 8.51552 14.2336 8.91883 14.2336 9.41585C14.2336 9.91286 13.8302 10.3162 13.3332 10.3162H11.2727L9.85375 17.5858C9.25329 20.6612 4.9101 20.8166 4.09203 17.7918C3.96234 17.312 4.24705 16.8171 4.7268 16.6873C5.20646 16.558 5.70066 16.8424 5.83031 17.3221C6.15107 18.5066 7.85185 18.4457 8.08715 17.241L9.43871 10.3162H7.70434C7.20728 10.3162 6.80395 9.9129 6.80395 9.41585C6.80395 8.91879 7.20728 8.51546 7.70434 8.51546H9.79027L10.2414 6.20491Z" fill="currentColor"/><path d="M17.2221 12.7502C17.5736 12.3988 18.1441 12.3989 18.4956 12.7502C18.8471 13.1017 18.847 13.6722 18.4956 14.0236L16.8696 15.6496L18.4956 17.2756C18.847 17.627 18.847 18.1976 18.4956 18.549C18.1441 18.9005 17.5736 18.9005 17.2221 18.549L15.5962 16.9231L13.9702 18.549C13.6187 18.9005 13.0482 18.9005 12.6968 18.549C12.3454 18.1976 12.3453 17.627 12.6968 17.2756L14.3227 15.6496L12.6968 14.0236C12.3453 13.6722 12.3453 13.1017 12.6968 12.7502C13.0482 12.3988 13.6187 12.3988 13.9702 12.7502L15.5962 14.3762L17.2221 12.7502Z" fill="currentColor"/></svg>
+        Алгебра
+      </button>
+      <button class="nav-btn" onclick="scrollToId('geometry')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2.09961L21.9004 19.8996H2.09961L12 2.09961ZM12 6.20312L5.68066 17.6992H18.3193L12 6.20312Z" fill="currentColor"/></svg>
+        Геометрия
+      </button>
+      <button class="nav-btn" onclick="scrollToId('probability')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2.09961C17.4676 2.09961 21.9004 6.53238 21.9004 12C21.9004 17.4676 17.4676 21.9004 12 21.9004C6.53238 21.9004 2.09961 17.4676 2.09961 12C2.09961 6.53238 6.53238 2.09961 12 2.09961ZM12 3.89961C7.52636 3.89961 3.89961 7.52636 3.89961 12C3.89961 16.4736 7.52636 20.1004 12 20.1004C16.4736 20.1004 20.1004 16.4736 20.1004 12C20.1004 7.52636 16.4736 3.89961 12 3.89961ZM12 6.99961C12.4969 6.99961 12.8996 7.40236 12.8996 7.89922V12.2926L15.5537 14.9467C15.9052 15.2982 15.9052 15.8687 15.5537 16.2202C15.2022 16.5716 14.6317 16.5716 14.2803 16.2202L11.2803 13.2202C11.1048 13.0447 10.9996 12.8038 10.9996 12.5504V7.89922C10.9996 7.40236 11.4024 6.99961 11.8993 6.99961H12Z" fill="currentColor"/></svg>
+        Вероятность
+      </button>
+      <button class="nav-btn" onclick="scrollToId('physics')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12.0996 2C14.1963 2.00002 16.1125 2.3224 17.5371 2.87402C18.2464 3.1487 18.8793 3.49843 19.3506 3.93164C19.8228 4.36576 20.2 4.95206 20.2002 5.66895V13.9688L20.1992 13.9736L20.2002 13.9785V18.1318C20.2 18.8486 19.8228 19.4351 19.3506 19.8691C18.8793 20.3023 18.2464 20.6521 17.5371 20.9268C16.1125 21.4784 14.1963 21.8008 12.0996 21.8008C10.0032 21.8008 8.08759 21.4782 6.66309 20.9268C5.95381 20.6521 5.31994 20.3023 4.84863 19.8691C4.37651 19.4351 4.00024 18.8486 4 18.1318V5.66895C4.00015 4.95211 4.37645 4.36575 4.84863 3.93164C5.31995 3.49842 5.95375 3.14869 6.66309 2.87402C8.0876 2.32255 10.0032 2.00002 12.0996 2Z" fill="currentColor"/></svg>
+        Физика
+      </button>
+      <button class="nav-btn" onclick="scrollToId('informatics')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M17 3.09961C19.1539 3.09966 20.9004 4.84612 20.9004 7V17C20.9004 19.1539 19.1539 20.9003 17 20.9004H7C4.84609 20.9004 3.09961 19.1539 3.09961 17V7C3.09961 4.84609 4.84609 3.09961 7 3.09961H17ZM7 4.90039C5.8402 4.90039 4.90039 5.8402 4.90039 7V17C4.90039 18.1598 5.8402 19.0996 7 19.0996H17C18.1598 19.0996 19.0996 18.1598 19.0996 17V7C19.0996 5.84024 18.1598 4.90044 17 4.90039H7Z" fill="currentColor"/><path d="M16.5293 15.0596C16.9496 15.1021 17.2772 15.4572 17.2773 15.8887C17.2773 16.3202 16.9497 16.6753 16.5293 16.7178L16.4443 16.7217H12C11.5399 16.7216 11.167 16.3488 11.167 15.8887C11.1671 15.4286 11.54 15.0558 12 15.0557H16.4443L16.5293 15.0596Z" fill="currentColor"/><path d="M6.96582 7.52246C7.27077 7.21751 7.75375 7.1983 8.08105 7.46484L8.14453 7.52246L10.8232 10.2002C11.5102 10.8872 11.5102 12.0014 10.8232 12.6885L8.14453 15.3672L8.08105 15.4248C7.75377 15.6913 7.27075 15.6721 6.96582 15.3672C6.66114 15.0621 6.64234 14.5791 6.90918 14.252L6.96582 14.1885L9.64453 11.5098C9.68057 11.4736 9.68062 11.415 9.64453 11.3789L6.96582 8.7002C6.64116 8.37488 6.6411 7.84774 6.96582 7.52246Z" fill="currentColor"/></svg>
+        Информатика
+      </button>
+    </div>
+  </div>
+</div>
+<!-- Math: Algebra -->
+<div class="section" id="math">
+  <div class="section-header">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="color:var(--kimi-color-text-primary)"><path d="M10.2414 6.20491C10.7108 3.80117 13.895 3.23962 15.1584 5.33772C15.4147 5.76355 15.2776 6.31672 14.8518 6.57307C14.426 6.82914 13.8728 6.69208 13.6164 6.26643C13.2032 5.57996 12.1618 5.76338 12.008 6.54964L11.6243 8.51546H13.3332C13.8302 8.51552 14.2336 8.91883 14.2336 9.41585C14.2336 9.91286 13.8302 10.3162 13.3332 10.3162H11.2727L9.85375 17.5858C9.25329 20.6612 4.9101 20.8166 4.09203 17.7918C3.96234 17.312 4.24705 16.8171 4.7268 16.6873C5.20646 16.558 5.70066 16.8424 5.83031 17.3221C6.15107 18.5066 7.85185 18.4457 8.08715 17.241L9.43871 10.3162H7.70434C7.20728 10.3162 6.80395 9.9129 6.80395 9.41585C6.80395 8.91879 7.20728 8.51546 7.70434 8.51546H9.79027L10.2414 6.20491Z" fill="currentColor"/><path d="M17.2221 12.7502C17.5736 12.3988 18.1441 12.3989 18.4956 12.7502C18.8471 13.1017 18.847 13.6722 18.4956 14.0236L16.8696 15.6496L18.4956 17.2756C18.847 17.627 18.847 18.1976 18.4956 18.549C18.1441 18.9005 17.5736 18.9005 17.2221 18.549L15.5962 16.9231L13.9702 18.549C13.6187 18.9005 13.0482 18.9005 12.6968 18.549C12.3454 18.1976 12.3453 17.627 12.6968 17.2756L14.3227 15.6496L12.6968 14.0236C12.3453 13.6722 12.3453 13.1017 12.6968 12.7502C13.0482 12.3988 13.6187 12.3988 13.9702 12.7502L15.5962 14.3762L17.2221 12.7502Z" fill="currentColor"/></svg>
+    <h2>Алгебра и дроби</h2>
+    <span class="count">15 инструментов</span>
+  </div>
+  <div class="grid" id="algebra-grid"></div>
+</div>
+<!-- Geometry -->
+<div class="section" id="geometry">
+  <div class="section-header">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="color:var(--kimi-color-text-primary)"><path d="M12 2.09961L21.9004 19.8996H2.09961L12 2.09961ZM12 6.20312L5.68066 17.6992H18.3193L12 6.20312Z" fill="currentColor"/></svg>
+    <h2>Геометрия и стереометрия</h2>
+    <span class="count">15 инструментов</span>
+  </div>
+  <div class="grid" id="geometry-grid"></div>
+</div>
+<!-- Probability -->
+<div class="section" id="probability">
+  <div class="section-header">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="color:var(--kimi-color-text-primary)"><path d="M12 2.09961C17.4676 2.09961 21.9004 6.53238 21.9004 12C21.9004 17.4676 17.4676 21.9004 12 21.9004C6.53238 21.9004 2.09961 17.4676 2.09961 12C2.09961 6.53238 6.53238 2.09961 12 2.09961ZM12 3.89961C7.52636 3.89961 3.89961 7.52636 3.89961 12C3.89961 16.4736 7.52636 20.1004 12 20.1004C16.4736 20.1004 20.1004 16.4736 20.1004 12C20.1004 7.52636 16.4736 3.89961 12 3.89961ZM12 6.99961C12.4969 6.99961 12.8996 7.40236 12.8996 7.89922V12.2926L15.5537 14.9467C15.9052 15.2982 15.9052 15.8687 15.5537 16.2202C15.2022 16.5716 14.6317 16.5716 14.2803 16.2202L11.2803 13.2202C11.1048 13.0447 10.9996 12.8038 10.9996 12.5504V7.89922C10.9996 7.40236 11.4024 6.99961 11.8993 6.99961H12Z" fill="currentColor"/></svg>
+    <h2>Теория вероятностей</h2>
+    <span class="count">15 инструментов</span>
+  </div>
+  <div class="grid" id="probability-grid"></div>
+</div>
+<!-- Physics -->
+<div class="section" id="physics">
+  <div class="section-header">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="color:var(--kimi-color-text-primary)"><path d="M12.0996 2C14.1963 2.00002 16.1125 2.3224 17.5371 2.87402C18.2464 3.1487 18.8793 3.49843 19.3506 3.93164C19.8228 4.36576 20.2 4.95206 20.2002 5.66895V13.9688L20.1992 13.9736L20.2002 13.9785V18.1318C20.2 18.8486 19.8228 19.4351 19.3506 19.8691C18.8793 20.3023 18.2464 20.6521 17.5371 20.9268C16.1125 21.4784 14.1963 21.8008 12.0996 21.8008C10.0032 21.8008 8.08759 21.4782 6.66309 20.9268C5.95381 20.6521 5.31994 20.3023 4.84863 19.8691C4.37651 19.4351 4.00024 18.8486 4 18.1318V5.66895C4.00015 4.95211 4.37645 4.36575 4.84863 3.93164C5.31995 3.49842 5.95375 3.14869 6.66309 2.87402C8.0876 2.32255 10.0032 2.00002 12.0996 2Z" fill="currentColor"/></svg>
+    <h2>Физика и симуляторы</h2>
+    <span class="count">15 инструментов</span>
+  </div>
+  <div class="grid" id="physics-grid"></div>
+</div>
+<!-- Informatics -->
+<div class="section" id="informatics">
+  <div class="section-header">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="color:var(--kimi-color-text-primary)"><path fill-rule="evenodd" clip-rule="evenodd" d="M17 3.09961C19.1539 3.09966 20.9004 4.84612 20.9004 7V17C20.9004 19.1539 19.1539 20.9003 17 20.9004H7C4.84609 20.9004 3.09961 19.1539 3.09961 17V7C3.09961 4.84609 4.84609 3.09961 7 3.09961H17ZM7 4.90039C5.8402 4.90039 4.90039 5.8402 4.90039 7V17C4.90039 18.1598 5.8402 19.0996 7 19.0996H17C18.1598 19.0996 19.0996 18.1598 19.0996 17V7C19.0996 5.84024 18.1598 4.90044 17 4.90039H7Z" fill="currentColor"/><path d="M16.5293 15.0596C16.9496 15.1021 17.2772 15.4572 17.2773 15.8887C17.2773 16.3202 16.9497 16.6753 16.5293 16.7178L16.4443 16.7217H12C11.5399 16.7216 11.167 16.3488 11.167 15.8887C11.1671 15.4286 11.54 15.0558 12 15.0557H16.4443L16.5293 15.0596Z" fill="currentColor"/><path d="M6.96582 7.52246C7.27077 7.21751 7.75375 7.1983 8.08105 7.46484L8.14453 7.52246L10.8232 10.2002C11.5102 10.8872 11.5102 12.0014 10.8232 12.6885L8.14453 15.3672L8.08105 15.4248C7.75377 15.6913 7.27075 15.6721 6.96582 15.3672C6.66114 15.0621 6.64234 14.5791 6.90918 14.252L6.96582 14.1885L9.64453 11.5098C9.68057 11.4736 9.68062 11.415 9.64453 11.3789L6.96582 8.7002C6.64116 8.37488 6.6411 7.84774 6.96582 7.52246Z" fill="currentColor"/></svg>
+    <h2>Информатика</h2>
+    <span class="count">Теория + практика</span>
+  </div>
+  <div class="info-block">
+    <h4>Блок 1. Теоретические основы</h4>
+    <p>Кодирование, системы счисления и алгебра логики — фундамент, на котором строится всё программирование.</p>
+  </div>
+  <div class="grid" id="informatics-grid"></div>
+</div>
+<!-- Support -->
+<div class="support-section" id="support">
+  <h2>Поддержать проект</h2>
+  <p>Если сайт помогает вам в учёбе, вы можете поддержать его развитие. Все инструменты останутся бесплатными и без рекламы.</p>
+  <button class="btn-primary" onclick="window.open('https://boosty.to','_blank')">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.05176 5.80851C9.05182 3.40834 11.8738 2.12034 13.6865 3.69328L20.8223 9.88761C22.096 10.9932 22.1109 12.9657 20.8535 14.0898L13.7178 20.4687C11.9138 22.0813 9.05176 20.8005 9.05176 18.3808V16.2909C8.2781 16.3437 7.66169 16.4514 7.10254 16.6503C6.38481 16.9056 5.65113 17.3526 4.79102 18.2382C4.28046 18.7639 3.50231 18.9277 2.82324 18.6523C2.14426 18.3767 1.7002 17.7171 1.7002 16.9843C1.70023 14.6724 2.26648 12.5077 3.66309 10.8456C4.95815 9.30449 6.8038 8.39034 9.05176 8.0839V5.80851ZM12.5068 5.05265C11.8594 4.49104 10.8516 4.95139 10.8516 5.80851V8.76652L10.8457 8.86808C10.7944 9.37188 10.3675 9.76305 9.85156 9.80558L9.44922 9.8466C5.37063 10.3374 3.50006 13.0427 3.5 16.9843C5.53883 14.885 7.34201 14.5134 9.85059 14.456C10.4027 14.4433 10.8515 14.894 10.8516 15.4462V18.3808C10.8516 19.1908 11.7494 19.6434 12.3926 19.2226L12.5176 19.1269L19.6533 12.747C20.0743 12.3706 20.0964 11.7283 19.7227 11.3241L19.6426 11.247L12.5068 5.05265Z" fill="currentColor"/></svg>
+    Поддержать на Boosty
+  </button>
+</div>
+<!-- Footer -->
+<div class="footer">
+  <p><strong>Учебный Центр</strong> — бесплатная образовательная платформа для школьников и студентов. Здесь собраны интерактивные калькуляторы, симуляторы и справочники по математике, физике и информатике. Сайт создан, чтобы сделать учёбу понятнее: вместо сухих формул — живые инструменты, где можно посчитать, проверить и поэкспериментировать. Никакой регистрации, всё работает прямо в браузере.</p>
+  <div class="links">
+    <a href="#" onclick="scrollToId('math');return false;">Математика</a>
+    <a href="#" onclick="scrollToId('physics');return false;">Физика</a>
+    <a href="#" onclick="scrollToId('informatics');return false;">Информатика</a>
+    <a href="#" onclick="scrollToId('support');return false;">Поддержать</a>
+  </div>
+</div>
+</div>
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Инструмент</h3>
+      <button class="modal-close" onclick="closeModal()" aria-label="Закрыть">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M17.9542 4.77253C18.3056 4.42106 18.8761 4.42106 19.2276 4.77253C19.579 5.12401 19.579 5.69452 19.2276 6.04597L13.2735 12.0001L19.2276 17.9542C19.5791 18.3056 19.5791 18.8761 19.2276 19.2276C18.8761 19.5791 18.3056 19.5791 17.9542 19.2276L12.0001 13.2735L6.04595 19.2276C5.69451 19.5791 5.12399 19.579 4.77252 19.2276C4.42104 18.8761 4.42104 18.3056 4.77252 17.9542L10.7266 12.0001L4.77252 6.04597C4.42104 5.6945 4.42104 5.124 4.77252 4.77253C5.12399 4.42107 5.69448 4.42106 6.04595 4.77253L12.0001 10.7266L17.9542 4.77253Z" fill="currentColor"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+<button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M11.386 2.36129C11.7378 2.01198 12.3059 2.013 12.6565 2.36358L18.1949 7.90204C18.5464 8.25351 18.5464 8.82336 18.1949 9.17483C17.8434 9.52631 17.2736 9.52631 16.9221 9.17483L12.9201 5.17277V21C12.9201 21.497 12.5171 21.9 12.0201 21.9C11.523 21.9 11.1201 21.497 11.1201 21V5.16172L7.07554 9.17713C6.7228 9.52733 6.15295 9.52527 5.80275 9.17253C5.45255 8.81979 5.45461 8.24995 5.80735 7.89975L11.386 2.36129Z" fill="currentColor"/></svg>
+</button>
+<script>
+// Icons map
+const icons = {
+  MathFormula: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M10.2414 6.20491C10.7108 3.80117 13.895 3.23962 15.1584 5.33772C15.4147 5.76355 15.2776 6.31672 14.8518 6.57307C14.426 6.82914 13.8728 6.69208 13.6164 6.26643C13.2032 5.57996 12.1618 5.76338 12.008 6.54964L11.6243 8.51546H13.3332C13.8302 8.51552 14.2336 8.91883 14.2336 9.41585C14.2336 9.91286 13.8302 10.3162 13.3332 10.3162H11.2727L9.85375 17.5858C9.25329 20.6612 4.9101 20.8166 4.09203 17.7918C3.96234 17.312 4.24705 16.8171 4.7268 16.6873C5.20646 16.558 5.70066 16.8424 5.83031 17.3221C6.15107 18.5066 7.85185 18.4457 8.08715 17.241L9.43871 10.3162H7.70434C7.20728 10.3162 6.80395 9.9129 6.80395 9.41585C6.80395 8.91879 7.20728 8.51546 7.70434 8.51546H9.79027L10.2414 6.20491Z" fill="currentColor"/><path d="M17.2221 12.7502C17.5736 12.3988 18.1441 12.3989 18.4956 12.7502C18.8471 13.1017 18.847 13.6722 18.4956 14.0236L16.8696 15.6496L18.4956 17.2756C18.847 17.627 18.847 18.1976 18.4956 18.549C18.1441 18.9005 17.5736 18.9005 17.2221 18.549L15.5962 16.9231L13.9702 18.549C13.6187 18.9005 13.0482 18.9005 12.6968 18.549C12.3454 18.1976 12.3453 17.627 12.6968 17.2756L14.3227 15.6496L12.6968 14.0236C12.3453 13.6722 12.3453 13.1017 12.6968 12.7502C13.0482 12.3988 13.6187 12.3988 13.9702 12.7502L15.5962 14.3762L17.2221 12.7502Z" fill="currentColor"/></svg>',
+  Data: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M12.0996 2C14.1963 2.00002 16.1125 2.3224 17.5371 2.87402C18.2464 3.1487 18.8793 3.49843 19.3506 3.93164C19.8228 4.36576 20.2 4.95206 20.2002 5.66895V13.9688L20.1992 13.9736L20.2002 13.9785V18.1318C20.2 18.8486 19.8228 19.4351 19.3506 19.8691C18.8793 20.3023 18.2464 20.6521 17.5371 20.9268C16.1125 21.4784 14.1963 21.8008 12.0996 21.8008C10.0032 21.8008 8.08759 21.4782 6.66309 20.9268C5.95381 20.6521 5.31994 20.3023 4.84863 19.8691C4.37651 19.4351 4.00024 18.8486 4 18.1318V5.66895C4.00015 4.95211 4.37645 4.36575 4.84863 3.93164C5.31995 3.49842 5.95375 3.14869 6.66309 2.87402C8.0876 2.32255 10.0032 2.00002 12.0996 2Z" fill="currentColor"/></svg>',
+  Diagram: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M10 5.1875C7.05286 6.05121 4.90039 8.77341 4.90039 12C4.90039 15.9212 8.07878 19.0996 12 19.0996C15.2265 19.0996 17.9477 16.947 18.8115 14H20.6719C19.764 17.9521 16.2274 20.9004 12 20.9004C7.08467 20.9004 3.09961 16.9153 3.09961 12C3.09961 7.77248 6.04784 4.23491 10 3.32715V5.1875Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.09961C17.4676 2.09961 21.9004 6.53238 21.9004 12C21.9004 12.4661 21.5457 12.8495 21.0918 12.8955L21 12.9004H12C11.5029 12.9004 11.0996 12.4971 11.0996 12V3C11.0996 2.50294 11.5029 2.09961 12 2.09961ZM12.9004 11.0996H20.0498C19.6346 7.34553 16.6545 4.36541 12.9004 3.9502V11.0996Z" fill="currentColor"/></svg>',
+  Histogram: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 3.33203C4.55224 3.33203 4.99993 3.7798 5 4.33203V18.0908H20.0674C20.6195 18.0908 21.0671 18.5388 21.0674 19.0908C21.0674 19.6431 20.6197 20.0908 20.0674 20.0908H5C3.89543 20.0908 3 19.1954 3 18.0908V4.33203C3.00007 3.7798 3.44776 3.33203 4 3.33203ZM8.19922 9.28418C8.7515 9.28418 9.19922 9.73189 9.19922 10.2842V15.6045C9.19908 16.1567 8.75142 16.6045 8.19922 16.6045C7.64719 16.6043 7.19936 16.1565 7.19922 15.6045V10.2842C7.19922 9.73202 7.6471 9.28438 8.19922 9.28418ZM17.2227 6.85645C17.7748 6.85658 18.2226 7.3043 18.2227 7.85645V15.6045C18.2225 16.1566 17.7747 16.6044 17.2227 16.6045C16.6705 16.6045 16.2228 16.1566 16.2227 15.6045V7.85645C16.2227 7.30422 16.6704 6.85645 17.2227 6.85645ZM12.7109 3.96387C13.2631 3.96387 13.7107 4.41175 13.7109 4.96387V15.6035C13.7109 16.1558 13.2632 16.6035 12.7109 16.6035C12.1587 16.6035 11.7109 16.1558 11.7109 15.6035V4.96387C11.7111 4.41175 12.1588 3.96387 12.7109 3.96387Z" fill="currentColor"/></svg>',
+  Linechart: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 3.08496C4.55224 3.08496 4.99993 3.53273 5 4.08496V18.0361H19.9941L20.0967 18.041C20.6008 18.0923 20.9941 18.5185 20.9941 19.0361C20.9941 19.5538 20.6008 19.9799 20.0967 20.0312L19.9941 20.0361H5C3.89546 20.0361 3.00005 19.1407 3 18.0361V4.08496C3.00007 3.53273 3.44776 3.08496 4 3.08496ZM18.2627 6.5166C18.6316 6.10561 19.2638 6.07157 19.6748 6.44043C20.0858 6.80932 20.1198 7.44153 19.751 7.85254L15.8682 12.1787C15.1552 12.9731 13.9437 13.0678 13.1162 12.3936L10.9121 10.5967L7.45117 14.6602C7.09308 15.0805 6.46145 15.1315 6.04102 14.7734C5.6206 14.4153 5.56969 13.7837 5.92773 13.3633L9.38965 9.2998C10.0949 8.47222 11.3318 8.36 12.1748 9.04688L14.3799 10.8428L18.2627 6.5166Z" fill="currentColor"/></svg>',
+  Code: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M16.5293 15.0596C16.9496 15.1021 17.2772 15.4572 17.2773 15.8887C17.2773 16.3202 16.9497 16.6753 16.5293 16.7178L16.4443 16.7217H12C11.5399 16.7216 11.167 16.3488 11.167 15.8887C11.1671 15.4286 11.54 15.0558 12 15.0557H16.4443L16.5293 15.0596Z" fill="currentColor"/><path d="M6.96582 7.52246C7.27077 7.21751 7.75375 7.1983 8.08105 7.46484L8.14453 7.52246L10.8232 10.2002C11.5102 10.8872 11.5102 12.0014 10.8232 12.6885L8.14453 15.3672L8.08105 15.4248C7.75377 15.6913 7.27075 15.6721 6.96582 15.3672C6.66114 15.0621 6.64234 14.5791 6.90918 14.252L6.96582 14.1885L9.64453 11.5098C9.68057 11.4736 9.68062 11.415 9.64453 11.3789L6.96582 8.7002C6.64116 8.37488 6.6411 7.84774 6.96582 7.52246Z" fill="currentColor"/><path fill-rule="evenodd" clip-rule="evenodd" d="M17 3.09961C19.1539 3.09966 20.9004 4.84612 20.9004 7V17C20.9004 19.1539 19.1539 20.9003 17 20.9004H7C4.84609 20.9004 3.09961 19.1539 3.09961 17V7C3.09961 4.84609 4.84609 3.09961 7 3.09961H17ZM7 4.90039C5.8402 4.90039 4.90039 5.8402 4.90039 7V17C4.90039 18.1598 5.8402 19.0996 7 19.0996H17C18.1598 19.0996 19.0996 18.1598 19.0996 17V7C19.0996 5.84024 18.1598 4.90044 17 4.90039H7Z" fill="currentColor"/></svg>',
+  Tabular: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 3.33203C4.55224 3.33203 4.99993 3.7798 5 4.33203V18.0908H20.0674C20.6195 18.0908 21.0671 18.5388 21.0674 19.0908C21.0674 19.6431 20.6197 20.0908 20.0674 20.0908H5C3.89543 20.0908 3 19.1954 3 18.0908V4.33203C3.00007 3.7798 3.44776 3.33203 4 3.33203ZM8.19922 9.28418C8.7515 9.28418 9.19922 9.73189 9.19922 10.2842V15.6045C9.19908 16.1567 8.75142 16.6045 8.19922 16.6045C7.64719 16.6043 7.19936 16.1565 7.19922 15.6045V10.2842C7.19922 9.73202 7.6471 9.28438 8.19922 9.28418ZM17.2227 6.85645C17.7748 6.85658 18.2226 7.3043 18.2227 7.85645V15.6045C18.2225 16.1566 17.7747 16.6044 17.2227 16.6045C16.6705 16.6045 16.2228 16.1566 16.2227 15.6045V7.85645C16.2227 7.30422 16.6704 6.85645 17.2227 6.85645ZM12.7109 3.96387C13.2631 3.96387 13.7107 4.41175 13.7109 4.96387V15.6035C13.7109 16.1558 13.2632 16.6035 12.7109 16.6035C12.1587 16.6035 11.7109 16.1558 11.7109 15.6035V4.96387C11.7111 4.41175 12.1588 3.96387 12.7109 3.96387Z" fill="currentColor"/></svg>',
+  Setting: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M16.0404 12C16.0404 9.76874 14.2313 7.9596 12.0001 7.9596C9.76883 7.9596 7.95972 9.76874 7.95972 12C7.95972 14.2313 9.76883 16.0404 12.0001 16.0404C14.2313 16.0404 16.0404 14.2313 16.0404 12ZM14.2222 12C14.2222 13.2271 13.2271 14.2222 12 14.2222C10.7729 14.2222 9.77783 13.2271 9.77783 12C9.77783 10.7729 10.7729 9.77778 12 9.77778C13.2271 9.77778 14.2222 10.7729 14.2222 12Z" fill="currentColor"/><path d="M9.91145 21.8009C9.29001 21.6797 8.76914 21.2612 8.50632 20.6922L8.07372 19.7556C7.88838 19.3544 7.43553 19.1048 6.95371 19.1549L5.89572 19.2647C5.2733 19.3293 4.64823 19.114 4.22298 18.6611C3.74343 18.1504 3.32454 17.6037 2.97033 17.0181C2.61571 16.4318 2.32839 15.8106 2.10407 15.1566C1.89769 14.5549 2.02148 13.8954 2.4089 13.3902L3.0376 12.5704C3.30043 12.2277 3.30042 11.7722 3.03758 11.4295L2.40413 10.6035C2.01474 10.0958 1.891 9.43198 2.10208 8.82826C2.55037 7.54612 3.27017 6.35997 4.22 5.34259C4.64518 4.8872 5.27275 4.67067 5.89701 4.73544L6.95383 4.84514C7.43561 4.89515 7.88844 4.6456 8.07377 4.24441L8.50266 3.31593C8.76494 2.74818 9.28448 2.33019 9.90423 2.20761C11.2916 1.9332 12.7148 1.93127 14.0885 2.19913C14.7099 2.32029 15.2308 2.73881 15.4937 3.3078L15.9263 4.24441C16.1116 4.6456 16.5644 4.89514 17.0462 4.84514L18.1043 4.73532C18.7267 4.67072 19.3518 4.88603 19.777 5.33886C20.2566 5.84953 20.6755 6.3963 21.0297 6.98193C21.3843 7.56823 21.6716 8.18942 21.8959 8.84339C22.1023 9.44509 21.9785 10.1046 21.5911 10.6098L20.9624 11.4295C20.6996 11.7722 20.6996 12.2278 20.9624 12.5705L21.5959 13.3964C21.9853 13.9042 22.109 14.568 21.8979 15.1717C21.4497 16.4538 20.7299 17.6399 19.7801 18.6573C19.3549 19.1128 18.7273 19.3294 18.103 19.2646L17.0462 19.1549C16.5645 19.1049 16.1116 19.3544 15.9263 19.7556L15.4974 20.6841C15.2351 21.2518 14.7156 21.6698 14.0958 21.7924C12.7083 22.0668 11.2852 22.0687 9.91145 21.8009ZM13.7432 20.0088C13.7844 20.0006 13.8259 19.9673 13.847 19.9216L14.2758 18.9931C14.7915 17.8768 15.9886 17.2171 17.2341 17.3464L18.2909 17.4561C18.3649 17.4638 18.4272 17.4423 18.4512 17.4166C19.2296 16.5828 19.8171 15.6146 20.1817 14.5716C20.1845 14.5636 20.1796 14.5373 20.1532 14.5029L19.5198 13.677C18.7564 12.6815 18.7564 11.3185 19.5198 10.323L20.1485 9.5033C20.1746 9.46927 20.1795 9.4429 20.1762 9.43327C19.9932 8.89965 19.7603 8.39623 19.4741 7.92293C19.1873 7.4489 18.846 7.00333 18.4517 6.58351C18.4272 6.55739 18.3656 6.53616 18.2921 6.54378L17.234 6.65361C15.9886 6.78287 14.7915 6.12317 14.2758 5.00689L13.8432 4.07027C13.822 4.02448 13.7811 3.9916 13.7406 3.98371C12.5983 3.76097 11.4132 3.76258 10.2571 3.99124C10.2158 3.99941 10.1744 4.03271 10.1533 4.07842L9.72441 5.00689C9.20875 6.12317 8.01164 6.7829 6.76619 6.6536L5.70942 6.54391C5.63535 6.53623 5.573 6.55774 5.54905 6.5834C4.77067 7.41713 4.18312 8.38534 3.81845 9.42835C3.81564 9.43637 3.82054 9.46265 3.84693 9.49706L4.48038 10.323C5.24381 11.3185 5.24383 12.6815 4.48041 13.6769L3.85171 14.4967C3.82561 14.5307 3.82066 14.5571 3.82396 14.5667C4.00701 15.1004 4.23986 15.6038 4.52613 16.0771C4.81284 16.5511 5.15421 16.9967 5.54845 17.4165C5.57298 17.4426 5.63461 17.4638 5.70811 17.4562L6.76608 17.3464C8.01157 17.2171 9.20871 17.8768 9.72438 18.9932L10.157 19.9297C10.1781 19.9755 10.2191 20.0084 10.2595 20.0163C11.4018 20.239 12.587 20.2374 13.7432 20.0088Z" fill="currentColor"/></svg>',
+  Search: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M11.5 3C16.1944 3 20 6.80558 20 11.5C20 13.523 19.2933 15.381 18.1132 16.8404L21.1364 19.8636C21.4879 20.2151 21.4879 20.7849 21.1364 21.1364C20.7849 21.4879 20.2151 21.4879 19.8636 21.1364L16.8404 18.1132C15.381 19.2933 13.523 20 11.5 20C6.80558 20 3 16.1944 3 11.5C3 6.80558 6.80558 3 11.5 3ZM11.5 18.2C15.2003 18.2 18.2 15.2003 18.2 11.5C18.2 7.79969 15.2003 4.8 11.5 4.8C7.79969 4.8 4.8 7.79969 4.8 11.5C4.8 15.2003 7.79969 18.2 11.5 18.2Z" fill="currentColor"/></svg>',
+  Info: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2.1001C17.4676 2.10031 21.8994 6.53286 21.8994 12.0005C21.8992 17.4679 17.4674 21.8997 12 21.8999C6.53237 21.8999 2.09982 17.4681 2.09961 12.0005C2.09961 6.53273 6.53224 2.1001 12 2.1001ZM12 3.8999C7.52636 3.8999 3.89941 7.52684 3.89941 12.0005C3.89963 16.474 7.52649 20.1001 12 20.1001C16.4733 20.0999 20.0994 16.4738 20.0996 12.0005C20.0996 7.52697 16.4735 3.90011 12 3.8999ZM12 9.50049C12.4969 9.50068 12.8994 9.87055 12.8994 10.3267V16.6743C12.8992 17.1303 12.4968 17.5003 12 17.5005C11.503 17.5005 11.0998 17.1304 11.0996 16.6743V10.3267C11.0996 9.87043 11.5029 9.50049 12 9.50049ZM12 6.49951C12.4968 6.49951 12.8994 6.90313 12.8994 7.3999C12.8992 7.8965 12.4966 8.30029 12 8.30029C11.5025 8.30028 11.0998 7.8965 11.0996 7.3999C11.0996 6.90313 11.5024 6.49952 12 6.49951Z" fill="currentColor"/></svg>',
+  Check: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M19.3027 5.9053C19.6542 5.55397 20.2247 5.55388 20.5761 5.9053C20.9273 6.25675 20.9273 6.82734 20.5761 7.17874L9.65911 18.0948C9.30773 18.4461 8.73814 18.446 8.38665 18.0948L3.42376 13.1328C3.0726 12.7814 3.07263 12.2118 3.42376 11.8604C3.77524 11.509 4.34575 11.5089 4.6972 11.8604L9.02239 16.1856L19.3027 5.9053Z" fill="currentColor"/></svg>',
+  Copy: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M17 7.09961C19.1539 7.09961 20.9004 8.84609 20.9004 11V17C20.9004 19.1539 19.1539 20.9004 17 20.9004H11C8.84609 20.9004 7.09961 19.1539 7.09961 17V11C7.09961 8.84609 8.84609 7.09961 11 7.09961H17ZM11 8.90039C9.8402 8.90039 8.90039 9.8402 8.90039 11V17C8.90039 18.1598 9.8402 19.0996 11 19.0996H17C18.1598 19.0996 19.0996 18.1598 19.0996 17V11C19.0996 9.84024 18.1598 8.90044 17 8.90039H11Z" fill="currentColor"/><path d="M5 3.09961C5.55228 3.09961 6 3.54732 6 4.09961V15C6 15.5523 5.55228 16 5 16C4.44772 16 4 15.5523 4 15V4.09961C4 3.54732 4.44772 3.09961 5 3.09961ZM8 3.09961H15C15.5523 3.09961 16 3.54732 16 4.09961C16 4.65189 15.5523 5.09961 15 5.09961H8C7.44772 5.09961 7 4.65189 7 4.09961C7 3.54732 7.44772 3.09961 8 3.09961Z" fill="currentColor"/></svg>',
+  Refresh: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2.09961C17.4676 2.09961 21.9004 6.53238 21.9004 12C21.9004 12.4661 21.5457 12.8495 21.0918 12.8955L21 12.9004H12C11.5029 12.9004 11.0996 12.4971 11.0996 12V3C11.0996 2.50294 11.5029 2.09961 12 2.09961ZM12.9004 11.0996H20.0498C19.6346 7.34553 16.6545 4.36541 12.9004 3.9502V11.0996Z" fill="currentColor"/><path d="M12 21.9004C6.53238 21.9004 2.09961 17.4676 2.09961 12C2.09961 11.5339 2.45428 11.1505 2.9082 11.1045L3 11.0996H12C12.4971 11.0996 12.9004 11.5029 12.9004 12V21C12.9004 21.4971 12.4971 21.9004 12 21.9004ZM11.0996 12.9004H3.9502C4.36541 16.6545 7.34553 19.6346 11.0996 20.0498V12.9004Z" fill="currentColor"/></svg>',
+  Add: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3C12.5523 3 13 3.44772 13 4V11H20C20.5523 11 21 11.4477 21 12C21 12.5523 20.5523 13 20 13H13V20C13 20.5523 12.5523 21 12 21C11.4477 21 11 20.5523 11 20V13H4C3.44772 13 3 12.5523 3 12C3 11.4477 3.44772 11 4 11H11V4C11 3.44772 11.4477 3 12 3Z" fill="currentColor"/></svg>',
+  Delete: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 4.09961C7.55228 4.09961 8 4.54732 8 5.09961V6H16V5.09961C16 4.54732 16.4477 4.09961 17 4.09961C17.5523 4.09961 18 4.54732 18 5.09961V6H20C20.5523 6 21 6.44772 21 7C21 7.55228 20.5523 8 20 8H4C3.44772 8 3 7.55228 3 7C3 6.44772 3.44772 6 4 6H6V5.09961C6 4.54732 6.44772 4.09961 7 4.09961ZM6 9H18V19C18 20.1046 17.1046 21 16 21H8C6.89543 21 6 20.1046 6 19V9ZM8 11V19H16V11H8Z" fill="currentColor"/></svg>',
+  Document: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M7 3.09961C6.44772 3.09961 6 3.54732 6 4.09961V19.8996C6 20.4519 6.44772 20.8996 7 20.8996H17C17.5523 20.8996 18 20.4519 18 19.8996V8.69961L13.3 3.09961H7ZM8 5.09961H12V8.09961C12 8.65189 12.4477 9.09961 13 9.09961H16V18.8996H8V5.09961ZM14 5.69961L16.3 8.09961H14V5.69961Z" fill="currentColor"/></svg>',
+  Folder: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 4.09961C3.44772 4.09961 3 4.54732 3 5.09961V18.8996C3 19.4519 3.44772 19.8996 4 19.8996H20C20.5523 19.8996 21 19.4519 21 18.8996V7.09961C21 6.54732 20.5523 6.09961 20 6.09961H12L10 4.09961H4ZM5 6.09961H9.17157L11.1716 8.09961H19V17.8996H5V6.09961Z" fill="currentColor"/></svg>',
+  Browser: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M5 3.09961C4.44772 3.09961 4 3.54732 4 4.09961V19.8996C4 20.4519 4.44772 20.8996 5 20.8996H19C19.5523 20.8996 20 20.4519 20 19.8996V4.09961C20 3.54732 19.5523 3.09961 19 3.09961H5ZM6 5.09961H18V7.09961H6V5.09961ZM6 9.09961H18V18.8996H6V9.09961Z" fill="currentColor"/></svg>',
+  Download: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3C12.5523 3 13 3.44772 13 4V12.2929L15.1464 10.1464C15.5414 9.75143 16.1782 9.75143 16.5732 10.1464C16.9683 10.5415 16.9683 11.1783 16.5732 11.5733L12.7071 15.4393C12.3166 15.8299 11.6834 15.8299 11.2929 15.4393L7.42678 11.5733C7.03175 11.1783 7.03175 10.5415 7.42678 10.1464C7.8218 9.75143 8.45859 9.75143 8.85361 10.1464L11 12.2929V4C11 3.44772 11.4477 3 12 3ZM5 16C5.55228 16 6 16.4477 6 17V19C6 19.5523 6.44772 20 7 20H17C17.5523 20 18 19.5523 18 19V17C18 16.4477 18.4477 16 19 16C19.5523 16 20 16.4477 20 17V19C20 20.6569 18.6569 22 17 22H7C5.34315 22 4 20.6569 4 19V17C4 16.4477 4.44772 16 5 16Z" fill="currentColor"/></svg>',
+  Link: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.97427 8.06961C4.99348 7.33581 6.18946 7.1 7.00001 7.1H9.00001C9.49706 7.1 9.90001 7.50294 9.90001 8C9.90001 8.49706 9.49706 8.9 9.00001 8.9H7.00001C6.47755 8.9 5.67353 9.06419 5.02599 9.53039C4.42434 9.96356 3.90001 10.6934 3.90001 12C3.90001 13.3066 4.42434 14.0364 5.02599 14.4696C5.67353 14.9358 6.47755 15.1 7.00001 15.1H9.00001C9.49706 15.1 9.90001 15.5029 9.90001 16C9.90001 16.4971 9.49706 16.9 9.00001 16.9H7.00001C6.18946 16.9 4.99348 16.6642 3.97427 15.9304C2.90917 15.1636 2.10001 13.8934 2.10001 12C2.10001 10.1066 2.90917 8.83644 3.97427 8.06961ZM14.1 8C14.1 7.50294 14.5029 7.1 15 7.1H17C17.8105 7.1 19.0065 7.33581 20.0257 8.06961C21.0908 8.83644 21.9 10.1066 21.9 12C21.9 13.8934 21.0908 15.1636 20.0257 15.9304C19.0065 16.6642 17.8105 16.9 17 16.9H15C14.5029 16.9 14.1 16.4971 14.1 16C14.1 15.5029 14.5029 15.1 15 15.1H17C17.5225 15.1 18.3265 14.9358 18.974 14.4696C19.5757 14.0364 20.1 13.3066 20.1 12C20.1 10.6934 19.5757 9.96356 18.974 9.53039C18.3265 9.06419 17.5225 8.9 17 8.9H15C14.5029 8.9 14.1 8.49706 14.1 8ZM7.10001 12C7.10001 11.5029 7.50295 11.1 8.00001 11.1H16C16.4971 11.1 16.9 11.5029 16.9 12C16.9 12.4971 16.4971 12.9 16 12.9H8.00001C7.50295 12.9 7.10001 12.4971 7.10001 12Z" fill="currentColor"/></svg>'
+};
+
+// Tool definitions
+const tools = {
+  algebra: [
+    {id:'eq',name:'Калькулятор уравнений',icon:'MathFormula',desc:'Решение линейных уравнений вида ax + b = c'},
+    {id:'frac',name:'Калькулятор дробей',icon:'Data',desc:'Сложение, вычитание, умножение, деление'},
+    {id:'disc',name:'Дискриминант и квадратные уравнения',icon:'Diagram',desc:'ax² + bx + c = 0'},
+    {id:'percent',name:'Калькулятор процентов',icon:'Histogram',desc:'Нахождение процента от числа'},
+    {id:'power',name:'Степени и корни',icon:'Linechart',desc:'Возведение в степень и извлечение корня'},
+    {id:'matrix',name:'Матрица 2×2',icon:'Tabular',desc:'Определитель, след, обратная'},
+    {id:'complex',name:'Комплексные числа',icon:'Code',desc:'Сложение и умножение комплексных'},
+    {id:'trig',name:'Тригонометрия',icon:'Diagram',desc:'sin, cos, tan в градусах'},
+    {id:'simplify',name:'Упроститель выражений',icon:'MathFormula',desc:'Раскрытие скобок и приведение'},
+    {id:'factor',name:'Разложение на множители',icon:'Data',desc:'Простые множители числа'},
+    {id:'limit',name:'Калькулятор пределов',icon:'Linechart',desc:'Численное приближение'},
+    {id:'graph',name:'График y = x²',icon:'Histogram',desc:'Построение параболы'},
+    {id:'sys',name:'Система уравнений',icon:'Tabular',desc:'2 линейных уравнения с 2 неизвестными'},
+    {id:'deriv',name:'Производная',icon:'MathFormula',desc:'Численная производная в точке'},
+    {id:'integral',name:'Интеграл',icon:'Diagram',desc:'Численное интегрирование'}
+  ],
+  geometry: [
+    {id:'tri',name:'Треугольник по сторонам',icon:'Diagram',desc:'Площадь по формуле Герона'},
+    {id:'circle',name:'Окружность',icon:'Data',desc:'Площадь круга и длина окружности'},
+    {id:'pyth',name:'Теорема Пифагора',icon:'MathFormula',desc:'Нахождение гипотенузы или катета'},
+    {id:'sphere',name:'Шар',icon:'Diagram',desc:'Объем и площадь поверхности'},
+    {id:'rect',name:'Прямоугольник',icon:'Tabular',desc:'Периметр, площадь, диагональ'},
+    {id:'vector',name:'Векторы',icon:'Linechart',desc:'Сложение, длина, скалярное произведение'},
+    {id:'cone',name:'Конус',icon:'Diagram',desc:'Объем и площадь боковой поверхности'},
+    {id:'cyl',name:'Цилиндр',icon:'Data',desc:'Объем и полная площадь'},
+    {id:'angle',name:'Перевод углов',icon:'MathFormula',desc:'Градусы ↔ радианы'},
+    {id:'dist',name:'Расстояние точек',icon:'Linechart',desc:'Между двумя точками на плоскости'},
+    {id:'poly',name:'Многоугольник',icon:'Histogram',desc:'Площадь правильного многоугольника'},
+    {id:'trap',name:'Трапеция',icon:'Tabular',desc:'Площадь по основаниям и высоте'},
+    {id:'sector',name:'Сектор круга',icon:'Diagram',desc:'Площадь и длина дуги'},
+    {id:'ellipse',name:'Эллипс',icon:'Data',desc:'Площадь по полуосям'},
+    {id:'cube',name:'Куб',icon:'Diagram',desc:'Объем, площадь, диагональ'}
+  ],
+  probability: [
+    {id:'prob',name:'Вероятность события',icon:'Histogram',desc:'P(A) = m / n'},
+    {id:'comb',name:'Сочетания и перестановки',icon:'Data',desc:'C(n,k), A(n,k), P(n)'},
+    {id:'coin',name:'Подбросить монетку',icon:'Diagram',desc:'Симуляция: орёл или решка'},
+    {id:'dice',name:'Игральные кости',icon:'MathFormula',desc:'Бросок 1–6 костей'},
+    {id:'wheel',name:'Колесо фортуны',icon:'Diagram',desc:'Случайный выбор из списка'},
+    {id:'binom',name:'Биномиальное распределение',icon:'Histogram',desc:'Вероятность k успехов из n'},
+    {id:'normal',name:'Нормальное распределение',icon:'Linechart',desc:'Плотность вероятности'},
+    {id:'stat',name:'Статистика выборки',icon:'Tabular',desc:'Среднее, медиана, дисперсия'},
+    {id:'tree',name:'Дерево вероятностей',icon:'Diagram',desc:'Визуализация 2 уровней'},
+    {id:'exp',name:'Мат. ожидание',icon:'Data',desc:'Для дискретной случайной величины'},
+    {id:'freq',name:'Частота',icon:'Histogram',desc:'Относительная частота события'},
+    {id:'rand',name:'Случайные числа',icon:'MathFormula',desc:'Генератор в диапазоне'},
+    {id:'walk',name:'Случайное блуждание',icon:'Linechart',desc:'Визуализация на плоскости'},
+    {id:'bayes',name:'Формула Байеса',icon:'Diagram',desc:'P(A|B) через P(B|A)'},
+    {id:'uniform',name:'Равномерное распределение',icon:'Data',desc:'Плотность на [a,b]'}
+  ],
+  physics: [
+    {id:'ohm',name:'Закон Ома',icon:'Diagram',desc:'I = U / R, мощность P = UI'},
+    {id:'energy',name:'Энергия',icon:'Data',desc:'Кинетическая и потенциальная'},
+    {id:'kinem',name:'Кинематика',icon:'Linechart',desc:'Равноускоренное движение'},
+    {id:'convert',name:'Конвертер',icon:'Tabular',desc:'Длина, масса, время, температура'},
+    {id:'pendulum',name:'Маятник',icon:'Diagram',desc:'Период колебаний T = 2π√(L/g)'},
+    {id:'gravity',name:'Гравитация',icon:'MathFormula',desc:'Сила притяжения двух тел'},
+    {id:'pressure',name:'Давление',icon:'Data',desc:'P = ρgh в жидкости'},
+    {id:'density',name:'Плотность',icon:'Histogram',desc:'ρ = m / V'},
+    {id:'work',name:'Работа и мощность',icon:'Linechart',desc:'A = F·s, N = A / t'},
+    {id:'wave',name:'Волна',icon:'Diagram',desc:'λ = v / f, скорость, частота'},
+    {id:'mirror',name:'Зеркало',icon:'Data',desc:'Фокусное расстояние F = R/2'},
+    {id:'resist',name:'Сопротивление',icon:'Tabular',desc:'R = ρL / S'},
+    {id:'capac',name:'Конденсатор',icon:'Diagram',desc:'C = Q / U'},
+    {id:'lens',name:'Линза',icon:'MathFormula',desc:'1/F = 1/d + 1/f'},
+    {id:'heat',name:'Теплоёмкость',icon:'Histogram',desc:'Q = cmΔt'}
+  ]
+};
+
+// Render cards
+function renderCards(category, gridId) {
+  const grid = document.getElementById(gridId);
+  tools[category].forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<div class="card-icon">${icons[t.icon]||icons.Info}</div><div class="card-title">${t.name}</div><div class="card-desc">${t.desc}</div>`;
+    card.onclick = () => openTool(category, t.id);
+    grid.appendChild(card);
+  });
+}
+
+renderCards('algebra','algebra-grid');
+renderCards('geometry','geometry-grid');
+renderCards('probability','probability-grid');
+renderCards('physics','physics-grid');
+
+// Informatics static cards
+const infGrid = document.getElementById('informatics-grid');
+const infTools = [
+  {name:'Перевод систем счисления',icon:'Code',desc:'Десятичная ↔ двоичная ↔ шестнадцатеричная'},
+  {name:'Калькулятор объёма информации',icon:'Data',desc:'Биты, байты, КБ, МБ, ГБ'},
+  {name:'Логические операции',icon:'Diagram',desc:'И, ИЛИ, НЕ, Исключающее ИЛИ'},
+  {name:'Таблица истинности',icon:'Tabular',desc:'Для 2 переменных A и B'},
+  {name:'Кодирование текста',icon:'MathFormula',desc:'ASCII/Unicode: символы в коды'},
+  {name:'Алгоритмические структуры',icon:'Linechart',desc:'Линейный, ветвление, цикл'},
+  {name:'Python-шпаргалка',icon:'Code',desc:'Синтаксис, переменные, циклы, условия'},
+  {name:'Сложность алгоритмов',icon:'Histogram',desc:'O(1), O(n), O(log n), O(n²)'},
+  {name:'Графы и деревья',icon:'Diagram',desc:'Основные определения и обход'},
+  {name:'Базы данных',icon:'Data',desc:'SQL: SELECT, INSERT, UPDATE'},
+  {name:'Сети и адресация',icon:'Linechart',desc:'IP, маска подсети'},
+  {name:'Шифр Цезаря',icon:'MathFormula',desc:'Шифрование со сдвигом'},
+  {name:'Двоичное сложение',icon:'Tabular',desc:'Поразрядное сложение с переносом'},
+  {name:'Единицы измерения',icon:'Histogram',desc:'Скорость, частота, мощность в IT'},
+  {name:'Временная сложность',icon:'Diagram',desc:'Оценка числа операций'}
+];
+infTools.forEach(t => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `<div class="card-icon">${icons[t.icon]||icons.Info}</div><div class="card-title">${t.name}</div><div class="card-desc">${t.desc}</div>`;
+  card.onclick = () => openInformatics(t.name);
+  infGrid.appendChild(card);
+});
+
+// Modal logic
+const modalOverlay = document.getElementById('modalOverlay');
+const modalTitle = document.getElementById('modalTitle');
+const modalBody = document.getElementById('modalBody');
+
+function openModal(title, html) {
+  modalTitle.textContent = title;
+  modalBody.innerHTML = html;
+  modalOverlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  modalOverlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function openTool(cat, id) {
+  const t = tools[cat].find(x => x.id === id);
+  if (!t) return;
+  const content = calculators[cat] && calculators[cat][id] ? calculators[cat][id]() : '<p>Инструмент в разработке</p>';
+  openModal(t.name, content);
+}
+
+function openInformatics(name) {
+  const content = informaticsCalc[name] ? informaticsCalc[name]() : '<p>Раздел в разработке</p>';
+  openModal(name, content);
+}
+
+// Scroll
+function scrollToId(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const map = {math:0,geometry:1,probability:2,physics:3,informatics:4};
+  if (map[id] != null) document.querySelectorAll('.nav-btn')[map[id]].classList.add('active');
+}
+
+// Scroll top button
+window.addEventListener('scroll', () => {
+  document.getElementById('scrollTop').style.display = window.scrollY > 400 ? 'flex' : 'none';
+});
+
+// ===================== CALCULATORS =====================
+
+function input(label, id, type='number', attrs='') {
+  return `<div class="form-group"><label>${label}</label><input type="${type}" id="${id}" ${attrs}></div>`;
+}
+function select(label, id, options) {
+  return `<div class="form-group"><label>${label}</label><select id="${id}">${options.map(o=>`<option value="${o.v}">${o.t}</option>`).join('')}</select></div>`;
+}
+function result(label, value, sub='') {
+  return `<div class="result-box"><div class="label">${label}</div><div class="value">${value}</div>${sub?`<div class="sub">${sub}</div>`:''}</div>`;
+}
+function btn(text, onclick) {
+  return `<button class="btn-primary" onclick="${onclick}" style="margin-top:8px">${text}</button>`;
+}
+function btn2(text, onclick) {
+  return `<button class="btn-secondary" onclick="${onclick}" style="margin-top:8px;margin-left:8px">${text}</button>`;
+}
+
+const calculators = {
+  algebra: {
+    eq: () => input('Уравнение: ax + b = c','eq_a','number','placeholder="a"') + 
+         input('','eq_b','number','placeholder="b"') + 
+         input('','eq_c','number','placeholder="c"') + 
+         btn('Решить','calcEq()') + '<div id="eq_res"></div>',
+    frac: () => select('Операция','f_op',[{v:'+',t:'Сложение'},{v:'-',t:'Вычитание'},{v:'*',t:'Умножение'},{v:'/',t:'Деление'}]) +
+         '<div class="form-row">' + input('Числитель 1','f_n1') + input('Знаменатель 1','f_d1') + '</div>' +
+         '<div class="form-row">' + input('Числитель 2','f_n2') + input('Знаменатель 2','f_d2') + '</div>' +
+         btn('Вычислить','calcFrac()') + '<div id="f_res"></div>',
+    disc: () => input('a','d_a') + input('b','d_b') + input('c','d_c') + btn('Найти корни','calcDisc()') + '<div id="d_res"></div>',
+    percent: () => input('Число','p_num') + input('Процент','p_pct') + btn('Посчитать','calcPercent()') + '<div id="p_res"></div>',
+    power: () => input('Основание','pw_base') + input('Показатель','pw_exp') + btn('Вычислить','calcPower()') + '<div id="pw_res"></div>',
+    matrix: () => '<div class="form-row">'+input('a11','m11')+input('a12','m12')+'</div><div class="form-row">'+input('a21','m21')+input('a22','m22')+'</div>' + btn('Определитель и след','calcMatrix()') + '<div id="m_res"></div>',
+    complex: () => '<div class="form-row">'+input('Re1','cr1')+input('Im1','ci1')+'</div><div class="form-row">'+input('Re2','cr2')+input('Im2','ci2')+'</div>' + select('Операция','cop',[{v:'+',t:'Сложение'},{v:'-',t:'Вычитание'},{v:'*',t:'Умножение'}]) + btn('Вычислить','calcComplex()') + '<div id="c_res"></div>',
+    trig: () => select('Функция','tf',[{v:'sin',t:'sin'},{v:'cos',t:'cos'},{v:'tan',t:'tan'},{v:'asin',t:'arcsin'},{v:'acos',t:'arccos'}]) + input('Угол (°)','t_deg') + btn('Вычислить','calcTrig()') + '<div id="t_res"></div>',
+    simplify: () => input('Выражение (например: 2*(x+3))','simp_expr','text','placeholder="2*(x+3)"') + btn('Упростить (демо)','calcSimplify()') + '<div id="simp_res"></div>',
+    factor: () => input('Число','fact_n') + btn('Разложить','calcFactor()') + '<div id="fact_res"></div>',
+    limit: () => input('Функция f(x)','lim_f','text','placeholder="x*x"') + input('x →','lim_x') + btn('Приблизить','calcLimit()') + '<div id="lim_res"></div>',
+    graph: () => '<canvas id="gcan" class="graph" width="480" height="220"></canvas>' + btn('Построить y = x²','drawGraph()'),
+    sys: () => '<p style="font-size:13px;color:var(--kimi-color-text-secondary);margin-bottom:12px">a₁x + b₁y = c₁<br>a₂x + b₂y = c₂</p>' +
+         '<div class="form-row">'+input('a1','s1')+input('b1','s2')+'</div>'+
+         '<div class="form-row">'+input('c1','s3')+input('a2','s4')+'</div>'+
+         '<div class="form-row">'+input('b2','s5')+input('c2','s6')+'</div>'+
+         btn('Решить','calcSys()') + '<div id="sys_res"></div>',
+    deriv: () => input('Функция f(x)','der_f','text','placeholder="x*x"') + input('Точка x','der_x') + btn('f\'(x)','calcDeriv()') + '<div id="der_res"></div>',
+    integral: () => input('Функция f(x)','int_f','text','placeholder="x"') + input('От','int_a') + input('До','int_b') + btn('∫f(x)dx','calcIntegral()') + '<div id="int_res"></div>'
+  },
+  geometry: {
+    tri: () => input('Сторона a','tr_a') + input('Сторона b','tr_b') + input('Сторона c','tr_c') + btn('Площадь (Герон)','calcTri()') + '<div id="tr_res"></div>',
+    circle: () => input('Радиус r','cir_r') + btn('Вычислить','calcCircle()') + '<div id="cir_res"></div>',
+    pyth: () => select('Что найти','py_w',[{v:'c',t:'Гипотенузу c'},{v:'a',t:'Катет a'}]) + input('Катет a','py_a') + input('Катет b / гипотенуза c','py_b') + btn('Найти','calcPyth()') + '<div id="py_res"></div>',
+    sphere: () => input('Радиус r','sp_r') + btn('Объем и площадь','calcSphere()') + '<div id="sp_res"></div>',
+    rect: () => input('Сторона a','rc_a') + input('Сторона b','rc_b') + btn('Вычислить','calcRect()') + '<div id="rc_res"></div>',
+    vector: () => '<div class="form-row">'+input('x1','vx1')+input('y1','vy1')+'</div><div class="form-row">'+input('x2','vx2')+input('y2','vy2')+'</div>' + select('Операция','vop',[{v:'add',t:'Сложение'},{v:'len',t:'Длина'},{v:'dot',t:'Скалярное'}]) + btn('Вычислить','calcVector()') + '<div id="v_res"></div>',
+    cone: () => input('Радиус основания r','co_r') + input('Высота h','co_h') + btn('Объем и площадь','calcCone()') + '<div id="co_res"></div>',
+    cyl: () => input('Радиус r','cy_r') + input('Высота h','cy_h') + btn('Объем и площадь','calcCyl()') + '<div id="cy_res"></div>',
+    angle: () => input('Значение','ang_v') + select('Из','ang_f',[{v:'d',t:'Градусы'},{v:'r',t:'Радианы'}]) + btn('Перевести','calcAngle()') + '<div id="ang_res"></div>',
+    dist: () => '<div class="form-row">'+input('x1','dx1')+input('y1','dy1')+'</div><div class="form-row">'+input('x2','dx2')+input('y2','dy2')+'</div>' + btn('Расстояние','calcDist()') + '<div id="d_res"></div>',
+    poly: () => input('Число сторон n','po_n') + input('Длина стороны a','po_a') + btn('Площадь','calcPoly()') + '<div id="po_res"></div>',
+    trap: () => input('Основание a','tp_a') + input('Основание b','tp_b') + input('Высота h','tp_h') + btn('Площадь','calcTrap()') + '<div id="tp_res"></div>',
+    sector: () => input('Радиус r','sec_r') + input('Угол (°)','sec_a') + btn('Площадь и дуга','calcSector()') + '<div id="sec_res"></div>',
+    ellipse: () => input('Большая полуось a','el_a') + input('Малая полуось b','el_b') + btn('Площадь','calcEllipse()') + '<div id="el_res"></div>',
+    cube: () => input('Ребро a','cu_a') + btn('Объем, площадь, диагональ','calcCube()') + '<div id="cu_res"></div>'
+  },
+  probability: {
+    prob: () => input('Благоприятные исходы m','pr_m') + input('Всего исходов n','pr_n') + btn('P(A)','calcProb()') + '<div id="pr_res"></div>',
+    comb: () => select('Функция','cb_f',[{v:'c',t:'Сочетания C(n,k)'},{v:'a',t:'Размещения A(n,k)'},{v:'p',t:'Перестановки P(n)'}]) + input('n','cb_n') + input('k','cb_k') + btn('Вычислить','calcComb()') + '<div id="cb_res"></div>',
+    coin: () => btn('Подбросить','flipCoin()') + '<div id="coin_res" style="margin-top:12px;font-size:24px;font-weight:500;text-align:center"></div>',
+    dice: () => input('Количество костей (1-10)','di_n','number','min="1" max="10" value="1"') + btn('Бросить','rollDice()') + '<div id="di_res" style="margin-top:12px;font-size:20px;font-weight:500;text-align:center"></div>',
+    wheel: () => input('Варианты через запятую','wh_v','text','placeholder="вар1, вар2, вар3" value="Да, Нет, Может быть"') + btn('Крутить','spinWheel()') + '<div id="wh_res" style="margin-top:16px;font-size:28px;font-weight:500;text-align:center;color:var(--kimi-color-accent)"></div>',
+    binom: () => input('n (испытания)','bn_n') + input('k (успехи)','bn_k') + input('p (вероятность)','bn_p','number','step="0.01" max="1"') + btn('P(X=k)','calcBinom()') + '<div id="bn_res"></div>',
+    normal: () => input('Среднее μ','nm_m') + input('Станд. отклонение σ','nm_s') + input('x','nm_x') + btn('Плотность','calcNormal()') + '<canvas id="nm_can" class="graph" width="480" height="180"></canvas>',
+    stat: () => input('Числа через запятую','st_v','text','placeholder="1,2,3,4,5"') + btn('Статистика','calcStat()') + '<div id="st_res"></div>',
+    tree: () => input('P(A)','tr_pa') + input('P(B|A)','tr_pba') + input('P(B|¬A)','tr_pnba') + btn('Построить','drawTree()') + '<canvas id="tr_can" class="graph" width="480" height="200"></canvas>',
+    exp: () => input('Значения xi через запятую','ex_x','text') + input('Вероятности pi через запятую','ex_p','text') + btn('E[X] и D[X]','calcExp()') + '<div id="ex_res"></div>',
+    freq: () => input('Число событий','fr_m') + input('Число испытаний','fr_n') + btn('Относительная частота','calcFreq()') + '<div id="fr_res"></div>',
+    rand: () => input('От','rnd_a') + input('До','rnd_b') + input('Количество','rnd_c') + btn('Сгенерировать','calcRand()') + '<div id="rnd_res"></div>',
+    walk: () => input('Шагов','wk_n','number','value="100"') + btn('Сгенерировать','drawWalk()') + '<canvas id="wk_can" class="graph" width="480" height="200"></canvas>',
+    bayes: () => input('P(A)','by_pa') + input('P(B|A)','by_pba') + input('P(B|¬A)','by_pnba') + btn('P(A|B)','calcBayes()') + '<div id="by_res"></div>',
+    uniform: () => input('a (начало)','un_a') + input('b (конец)','un_b') + input('x','un_x') + btn('Плотность f(x)','calcUniform()') + '<div id="un_res"></div>'
+  },
+  physics: {
+    ohm: () => '<div class="form-row">'+input('Напряжение U (В)','oh_u')+input('Сила тока I (А)','oh_i')+'</div>'+
+         '<div class="form-row">'+input('Сопротивление R (Ом)','oh_r')+input('Мощность P (Вт)','oh_p')+'</div>'+
+         '<p style="font-size:12px;color:var(--kimi-color-text-quaternary);margin-bottom:8px">Заполните 2 из 4 полей</p>'+
+         btn('Рассчитать','calcOhm()') + '<div id="oh_res"></div>',
+    energy: () => select('Что найти','en_w',[{v:'ke',t:'Кинетическая E=mv²/2'},{v:'pe',t:'Потенциальная E=mgh'}]) +
+         input('Масса m (кг)','en_m') + input('Скорость v (м/с) или высота h (м)','en_v') + input('g (м/с²)','en_g','number','value="9.8"') +
+         btn('Вычислить','calcEnergy()') + '<div id="en_res"></div>',
+    kinem: () => select('Что найти','kn_w',[{v:'s',t:'Путь s'},{v:'v',t:'Скорость v'},{v:'t',t:'Время t'}]) +
+         input('Начальная скорость v₀','kn_v0','number','value="0"') + input('Ускорение a','kn_a') + input('Время t / скорость v / путь s','kn_t') +
+         btn('Рассчитать','calcKinem()') + '<div id="kn_res"></div>',
+    convert: () => select('Из','cv_f',[{v:'m',t:'Метры'},{v:'km',t:'Километры'},{v:'kg',t:'Килограммы'},{v:'g',t:'Граммы'},{v:'c',t:'°C'},{v:'f',t:'°F'}]) +
+         input('Значение','cv_v') +
+         select('В','cv_t',[{v:'km',t:'Километры'},{v:'m',t:'Метры'},{v:'g',t:'Граммы'},{v:'kg',t:'Килограммы'},{v:'f',t:'°F'},{v:'c',t:'°C'}]) +
+         btn('Конвертировать','calcConvert()') + '<div id="cv_res"></div>',
+    pendulum: () => input('Длина нити L (м)','pen_l') + input('g (м/с²)','pen_g','number','value="9.8"') + btn('Период T','calcPend()') + '<div id="pen_res"></div>',
+    gravity: () => input('Масса 1 m₁ (кг)','gr_m1') + input('Масса 2 m₂ (кг)','gr_m2') + input('Расстояние r (м)','gr_r') + btn('Сила F','calcGravity()') + '<div id="gr_res"></div>',
+    pressure: () => input('Плотность ρ (кг/м³)','pr_rho') + input('Высота h (м)','pr_h') + input('g','pr_g','number','value="9.8"') + btn('Давление P','calcPressure()') + '<div id="prs_res"></div>',
+    density: () => input('Масса m (кг)','den_m') + input('Объем V (м³)','den_v') + btn('Плотность ρ','calcDensity()') + '<div id="den_res"></div>',
+    work: () => input('Сила F (Н)','wr_f') + input('Расстояние s (м)','wr_s') + input('Время t (с)','wr_t') + btn('Работа A и мощность N','calcWork()') + '<div id="wr_res"></div>',
+    wave: () => input('Скорость v (м/с)','wv_v') + input('Частота f (Гц)','wv_f') + input('Длина волны λ (м)','wv_l') + btn('Найти третий параметр','calcWave()') + '<div id="wv_res"></div>',
+    mirror: () => input('Радиус кривизны R (м)','mi_r') + btn('Фокусное расстояние F','calcMirror()') + '<div id="mi_res"></div>',
+    resist: () => input('Удельное сопротивление ρ (Ом·м)','rs_rho') + input('Длина L (м)','rs_l') + input('Площадь S (м²)','rs_s') + btn('Сопротивление R','calcResist()') + '<div id="rs_res"></div>',
+    capac: () => input('Заряд Q (Кл)','cap_q') + input('Напряжение U (В)','cap_u') + btn('Ёмкость C','calcCapac()') + '<div id="cap_res"></div>',
+    lens: () => input('Расстояние до предмета d (м)','le_d') + input('Расстояние до изображения f (м)','le_f') + btn('Фокусное расстояние F','calcLens()') + '<div id="le_res"></div>',
+    heat: () => input('Масса m (кг)','ht_m') + input('Удельная теплоёмкость c','ht_c') + input('Δt (°C)','ht_dt') + btn('Количество теплоты Q','calcHeat()') + '<div id="ht_res"></div>'
+  }
+};
+
+// ===================== INFORMATICS =====================
+const informaticsCalc = {
+  'Перевод систем счисления': () => input('Число','ns_num','text','placeholder="255"') + select('Из','ns_from',[{v:'10',t:'Десятичная'},{v:'2',t:'Двоичная'},{v:'16',t:'Шестнадцатеричная'},{v:'8',t:'Восьмеричная'}]) + select('В','ns_to',[{v:'2',t:'Двоичная'},{v:'10',t:'Десятичная'},{v:'16',t:'Шестнадцатеричная'},{v:'8',t:'Восьмеричная'}]) + btn('Перевести','calcNS()') + '<div id="ns_res"></div>',
+  'Калькулятор объёма информации': () => input('Значение','ib_v') + select('Единица','ib_u',[{v:'b',t:'бит'},{v:'B',t:'байт'},{v:'KB',t:'КБ'},{v:'MB',t:'МБ'},{v:'GB',t:'ГБ'}]) + btn('Перевести во все единицы','calcInfo()') + '<div id="ib_res"></div>',
+  'Логические операции': () => select('Операция','lo_op',[{v:'and',t:'И (AND)'},{v:'or',t:'ИЛИ (OR)'},{v:'not',t:'НЕ (NOT)'},{v:'xor',t:'Искл. ИЛИ (XOR)'}]) + input('A (0 или 1)','lo_a','number','min="0" max="1"') + input('B (0 или 1)','lo_b','number','min="0" max="1"') + btn('Вычислить','calcLogic()') + '<div id="lo_res"></div>',
+  'Таблица истинности': () => select('Выражение','tt_e',[{v:'and',t:'A ∧ B'},{v:'or',t:'A ∨ B'},{v:'impl',t:'A → B'},{v:'eq',t:'A ↔ B'}]) + btn('Показать таблицу','calcTT()') + '<div id="tt_res" style="margin-top:12px"></div>',
+  'Кодирование текста': () => input('Текст','ct_t','text','placeholder="Привет"') + btn('В ASCII-коды','calcASCII()') + '<div id="ct_res"></div>',
+  'Алгоритмические структуры': () => '<div class="info-block"><h4>Три базовые структуры</h4><p><strong>Следование</strong> — команды выполняются по порядку.<br><strong>Ветвление</strong> — если условие истинно, выполняется один блок, иначе — другой.<br><strong>Цикл</strong> — повторение блока команд пока условие выполняется.</p></div><p style="font-size:13px;color:var(--kimi-color-text-secondary)">Это справочный раздел. Для практики используйте калькуляторы выше.</p>',
+  'Python-шпаргалка': () => '<div class="info-block"><h4>Базовый синтаксис Python</h4><p>x = 10 # переменная<br>print(x) # вывод<br>if x > 5: # условие<br>&nbsp;&nbsp;print("больше")<br>for i in range(5): # цикл<br>&nbsp;&nbsp;print(i)</p></div>',
+  'Сложность алгоритмов': () => '<div class="info-block"><h4>Оценка сложности</h4><p>O(1) — константная<br>O(log n) — логарифмическая<br>O(n) — линейная<br>O(n²) — квадратичная<br>O(2ⁿ) — экспоненциальная</p></div>',
+  'Графы и деревья': () => '<div class="info-block"><h4>Основные определения</h4><p><strong>Граф</strong> — набор вершин и рёбер.<br><strong>Дерево</strong> — связный граф без циклов.<br><strong>Обход в ширину (BFS)</strong> — по уровням.<br><strong>Обход в глубину (DFS)</strong> — до упора вглубь.</p></div>',
+  'Базы данных': () => '<div class="info-block"><h4>Основные SQL-операторы</h4><p>SELECT * FROM table;<br>INSERT INTO table VALUES (...);<br>UPDATE table SET col=val WHERE ...;<br>DELETE FROM table WHERE ...;</p></div>',
+  'Сети и адресация': () => input('IP-адрес','ip_a','text','placeholder="192.168.1.1"') + input('Маска подсети','ip_m','text','placeholder="255.255.255.0"') + btn('Анализировать','calcIP()') + '<div id="ip_res"></div>',
+  'Шифр Цезаря': () => input('Текст','cz_t','text') + input('Сдвиг','cz_s','number','value="3"') + select('Направление','cz_d',[{v:'enc',t:'Зашифровать'},{v:'dec',t:'Расшифровать'}]) + btn('Применить','calcCaesar()') + '<div id="cz_res"></div>',
+  'Двоичное сложение': () => input('Число 1 (двоичное)','bs_a','text','placeholder="1010"') + input('Число 2 (двоичное)','bs_b','text','placeholder="1100"') + btn('Сложить','calcBinSum()') + '<div id="bs_res"></div>',
+  'Единицы измерения': () => '<div class="info-block"><h4>Основные единицы в IT</h4><p>1 байт = 8 бит<br>1 КБ = 1024 байт<br>1 МБ = 1024 КБ<br>1 ГБ = 1024 МБ<br>1 ТБ = 1024 ГБ</p></div>',
+  'Временная сложность': () => input('n','tc_n','number','value="1000"') + btn('Оценить операции','calcTC()') + '<div id="tc_res"></div>'
+};
+
+// ===================== CALC FUNCTIONS =====================
+
+function get(id) { return parseFloat(document.getElementById(id)?.value) || 0; }
+function getv(id) { return document.getElementById(id)?.value || ''; }
+function set(id, html) { const el = document.getElementById(id); if(el) el.innerHTML = html; }
+
+function gcd(a,b){ return b?gcd(b,a%b):Math.abs(a); }
+function fact(n){ let r=1; for(let i=2;i<=n;i++)r*=i; return r; }
+function C(n,k){ if(k<0||k>n)return 0; return fact(n)/(fact(k)*fact(n-k)); }
+function A(n,k){ if(k<0||k>n)return 0; return fact(n)/fact(n-k); }
+
+// Algebra
+window.calcEq = function(){ const a=get('eq_a'),b=get('eq_b'),c=get('eq_c'); if(!a){set('eq_res',result('Ошибка','a не может быть 0'));return;} const x=(c-b)/a; set('eq_res',result('x = '+x.toFixed(4),'Проверка: '+a+'·'+x.toFixed(2)+' + '+b+' = '+(a*x+b).toFixed(2))); };
+window.calcFrac = function(){
+  const n1=get('f_n1'),d1=get('f_d1'),n2=get('f_n2'),d2=get('f_d2'),op=document.getElementById('f_op').value;
+  if(!d1||!d2){set('f_res',result('Ошибка','Знаменатель не может быть 0'));return;}
+  let nr,dr; switch(op){case'+':nr=n1*d2+n2*d1;dr=d1*d2;break;case'-':nr=n1*d2-n2*d1;dr=d1*d2;break;case'*':nr=n1*n2;dr=d1*d2;break;case'/':nr=n1*d2;dr=d1*n2;break;}
+  const g=gcd(nr,dr); set('f_res',result('Результат',(nr/g)+' / '+(dr/g),'Десятичное: '+(nr/dr).toFixed(4)));
+};
+window.calcDisc = function(){
+  const a=get('d_a'),b=get('d_b'),c=get('d_c'); const D=b*b-4*a*c;
+  let txt='D = ' + D.toFixed(2); if(D<0){txt+='<br>Корней нет (D < 0)';}else if(D===0){const x=-b/(2*a);txt+='<br>x = '+x.toFixed(4);}else{const x1=(-b+Math.sqrt(D))/(2*a),x2=(-b-Math.sqrt(D))/(2*a);txt+='<br>x₁ = '+x1.toFixed(4)+'<br>x₂ = '+x2.toFixed(4);}
+  set('d_res',result('Решение',txt));
+};
+window.calcPercent = function(){ const n=get('p_num'),p=get('p_pct'); set('p_res',result('Результат',(n*p/100).toFixed(4),p+'% от '+n)); };
+window.calcPower = function(){ const b=get('pw_base'),e=get('pw_exp'); set('pw_res',result('Результат',Math.pow(b,e).toFixed(6),'√'+b+' = '+(b>=0?Math.sqrt(b).toFixed(4):'комплексное'))); };
+window.calcMatrix = function(){
+  const a=get('m11'),b=get('m12'),c=get('m21'),d=get('m22');
+  const det=a*d-b*c, trace=a+d;
+  let inv='Нет обратной'; if(det!==0) inv = (d/det).toFixed(3)+' '+(-b/det).toFixed(3)+'<br>'+(-c/det).toFixed(3)+' '+(a/det).toFixed(3);
+  set('m_res',result('Определитель',det.toFixed(4),'След: '+trace+ '<br>Обратная:<br>'+inv));
+};
+window.calcComplex = function(){
+  const r1=get('cr1'),i1=get('ci1'),r2=get('cr2'),i2=get('ci2'),op=document.getElementById('cop').value;
+  let rr,ri; switch(op){case'+':rr=r1+r2;ri=i1+i2;break;case'-':rr=r1-r2;ri=i1-i2;break;case'*':rr=r1*r2-i1*i2;ri=r1*i2+r2*i1;break;}
+  set('c_res',result('Результат',rr.toFixed(3)+(ri>=0?'+':'')+ri.toFixed(3)+'i'));
+};
+window.calcTrig = function(){
+  const f=document.getElementById('tf').value, d=get('t_deg'), rad=d*Math.PI/180;
+  let r; switch(f){case'sin':r=Math.sin(rad);break;case'cos':r=Math.cos(rad);break;case'tan':r=Math.tan(rad);break;case'asin':r=Math.asin(d)*180/Math.PI;break;case'acos':r=Math.acos(d)*180/Math.PI;break;}
+  set('t_res',result('Результат',typeof r==='number'?r.toFixed(5):r));
+};
+window.calcSimplify = function(){
+  const expr=getv('simp_expr').toLowerCase().replace(/\s/g,'');
+  let out='Упрощённое: '+expr; if(expr==='2*(x+3)') out='2x + 6'; if(expr==='(x+2)*(x-2)') out='x² - 4';
+  set('simp_res',result('Результат',out,'Демо-версия: поддерживаются простые шаблоны'));
+};
+window.calcFactor = function(){
+  const n=Math.abs(Math.round(get('fact_n'))); let factors=[]; let temp=n;
+  for(let i=2;i*i<=temp;i++) while(temp%i===0){factors.push(i);temp/=i;}
+  if(temp>1) factors.push(temp);
+  set('fact_res',result('Разложение',n+' = '+factors.join(' × ')));
+};
+window.calcLimit = function(){
+  const fstr=getv('lim_f'), x0=get('lim_x');
+  let f = new Function('x','return '+fstr.replace(/\^/g,'**'));
+  const h=0.0001; try{ const l1=f(x0+h), l2=f(x0-h); set('lim_res',result('Предел',((l1+l2)/2).toFixed(5),'Приближение с обеих сторон')); }catch(e){set('lim_res',result('Ошибка','Неверное выражение'));}
+};
+window.drawGraph = function(){
+  const c=document.getElementById('gcan'), ctx=c.getContext('2d'), w=c.width, h=c.height;
+  ctx.clearRect(0,0,w,h); ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--kimi-color-border'); ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(0,h/2); ctx.lineTo(w,h/2); ctx.moveTo(w/2,0); ctx.lineTo(w/2,h); ctx.stroke();
+  ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--kimi-chart-1'); ctx.lineWidth=2;
+  ctx.beginPath(); for(let px=0;px<w;px++){const x=(px-w/2)/40; const y=x*x; const py=h/2-y*5; if(px===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);} ctx.stroke();
+};
+window.calcSys = function(){
+  const a1=get('s1'),b1=get('s2'),c1=get('s3'),a2=get('s4'),b2=get('s5'),c2=get('s6');
+  const det=a1*b2-a2*b1;
+  if(Math.abs(det)<1e-9){set('sys_res',result('Решение','Нет единственного решения','det = 0'));return;}
+  const x=(c1*b2-c2*b1)/det, y=(a1*c2-a2*c1)/det;
+  set('sys_res',result('Решение','x = '+x.toFixed(4)+'<br>y = '+y.toFixed(4)));
+};
+window.calcDeriv = function(){
+  const fstr=getv('der_f'), x=get('der_x');
+  let f = new Function('x','return '+fstr.replace(/\^/g,'**'));
+  const h=1e-5; try{ const d=(f(x+h)-f(x-h))/(2*h); set('der_res',result('f\'(x)',d.toFixed(6))); }catch(e){set('der_res',result('Ошибка','Неверное выражение'));}
+};
+window.calcIntegral = function(){
+  const fstr=getv('int_f'), a=get('int_a'), b=get('int_b');
+  let f = new Function('x','return '+fstr.replace(/\^/g,'**'));
+  const n=1000, h=(b-a)/n; let s=0; try{ for(let i=0;i<n;i++) s+=f(a+i*h); s*=h; set('int_res',result('∫f(x)dx ≈',s.toFixed(6),'Метод прямоугольников, n=1000')); }catch(e){set('int_res',result('Ошибка','Неверное выражение'));}
+};
+
+// Geometry
+window.calcTri = function(){
+  const a=get('tr_a'),b=get('tr_b'),c=get('tr_c');
+  if(a+b<=c||a+c<=b||b+c<=a){set('tr_res',result('Ошибка','Треугольник не существует'));return;}
+  const p=(a+b+c)/2, area=Math.sqrt(p*(p-a)*(p-b)*(p-c));
+  set('tr_res',result('Площадь (Герон)',area.toFixed(4),'p = '+p));
+};
+window.calcCircle = function(){
+  const r=get('cir_r'); set('cir_res',result('Результаты','S = '+(Math.PI*r*r).toFixed(4)+'<br>C = '+(2*Math.PI*r).toFixed(4)));
+};
+window.calcPyth = function(){
+  const w=document.getElementById('py_w').value, a=get('py_a'), b=get('py_b');
+  if(w==='c') set('py_res',result('Гипотенуза c',Math.sqrt(a*a+b*b).toFixed(4))); else set('py_res',result('Катет a',Math.sqrt(b*b-a*a).toFixed(4)));
+};
+window.calcSphere = function(){
+  const r=get('sp_r'); set('sp_res',result('Результаты','V = '+(4/3*Math.PI*r*r*r).toFixed(4)+'<br>S = '+(4*Math.PI*r*r).toFixed(4)));
+};
+window.calcRect = function(){
+  const a=get('rc_a'),b=get('rc_b'); set('rc_res',result('Результаты','P = '+(2*(a+b)).toFixed(2)+'<br>S = '+(a*b).toFixed(2)+'<br>d = '+Math.sqrt(a*a+b*b).toFixed(4)));
+};
+window.calcVector = function(){
+  const x1=get('vx1'),y1=get('vy1'),x2=get('vx2'),y2=get('vy2'),op=document.getElementById('vop').value;
+  let txt; switch(op){case'add':txt='('+(x1+x2).toFixed(2)+'; '+(y1+y2).toFixed(2)+')';break;case'len':txt='|v₁| = '+Math.sqrt(x1*x1+y1*y1).toFixed(4)+'<br>|v₂| = '+Math.sqrt(x2*x2+y2*y2).toFixed(4);break;case'dot':txt=(x1*x2+y1*y2).toFixed(4);break;}
+  set('v_res',result('Результат',txt));
+};
+window.calcCone = function(){
+  const r=get('co_r'),h=get('co_h'), l=Math.sqrt(r*r+h*h);
+  set('co_res',result('Результаты','V = '+(Math.PI*r*r*h/3).toFixed(4)+'<br>S_бок = '+(Math.PI*r*l).toFixed(4)));
+};
+window.calcCyl = function(){
+  const r=get('cy_r'),h=get('cy_h'); set('cy_res',result('Результаты','V = '+(Math.PI*r*r*h).toFixed(4)+'<br>S_полн = '+(2*Math.PI*r*(r+h)).toFixed(4)));
+};
+window.calcAngle = function(){
+  const v=get('ang_v'),f=document.getElementById('ang_f').value;
+  if(f==='d') set('ang_res',result('Радианы',(v*Math.PI/180).toFixed(6)+' rad')); else set('ang_res',result('Градусы',(v*180/Math.PI).toFixed(4)+'°'));
+};
+window.calcDist = function(){
+  const dx=get('dx2')-get('dx1'), dy=get('dy2')-get('dy1'); set('d_res',result('Расстояние',Math.sqrt(dx*dx+dy*dy).toFixed(4)));
+};
+window.calcPoly = function(){
+  const n=get('po_n'),a=get('po_a'); set('po_res',result('Площадь',(n*a*a/(4*Math.tan(Math.PI/n))).toFixed(4)));
+};
+window.calcTrap = function(){
+  const a=get('tp_a'),b=get('tp_b'),h=get('tp_h'); set('tp_res',result('Площадь',((a+b)*h/2).toFixed(4)));
+};
+window.calcSector = function(){
+  const r=get('sec_r'),a=get('sec_a'),rad=a*Math.PI/180;
+  set('sec_res',result('Результаты','S = '+(0.5*r*r*rad).toFixed(4)+'<br>L = '+(r*rad).toFixed(4)));
+};
+window.calcEllipse = function(){
+  const a=get('el_a'),b=get('el_b'); set('el_res',result('Площадь',(Math.PI*a*b).toFixed(4)));
+};
+window.calcCube = function(){
+  const a=get('cu_a'); set('cu_res',result('Результаты','V = '+(a*a*a).toFixed(2)+'<br>S = '+(6*a*a).toFixed(2)+'<br>d = '+(a*Math.sqrt(3)).toFixed(4)));
+};
+
+// Probability
+window.calcProb = function(){ const m=get('pr_m'),n=get('pr_n'); if(!n){set('pr_res',result('Ошибка','n = 0'));return;} set('pr_res',result('P(A)',(m/n).toFixed(6),m+' / '+n)); };
+window.calcComb = function(){
+  const f=document.getElementById('cb_f').value, n=Math.round(get('cb_n')), k=Math.round(get('cb_k'));
+  let r; switch(f){case'c':r=C(n,k);break;case'a':r=A(n,k);break;case'p':r=fact(n);break;}
+  set('cb_res',result('Результат',r.toFixed(0)));
+};
+window.flipCoin = function(){ const outcomes=['Орёл','Решка']; set('coin_res',outcomes[Math.floor(Math.random()*2)]); };
+window.rollDice = function(){
+  const n=Math.max(1,Math.min(10,Math.round(get('di_n')))), res=[];
+  for(let i=0;i<n;i++) res.push(Math.floor(Math.random()*6)+1);
+  set('di_res',res.join(' ')+' (сумма: '+res.reduce((a,b)=>a+b,0)+')');
+};
+window.spinWheel = function(){
+  const vals=getv('wh_v').split(',').map(s=>s.trim()).filter(s=>s);
+  if(!vals.length){set('wh_res','Введите варианты');return;}
+  set('wh_res',vals[Math.floor(Math.random()*vals.length)]);
+};
+window.calcBinom = function(){
+  const n=Math.round(get('bn_n')),k=Math.round(get('bn_k')),p=get('bn_p');
+  const r=C(n,k)*Math.pow(p,k)*Math.pow(1-p,n-k); set('bn_res',result('P(X = k)',r.toFixed(6)));
+};
+window.calcNormal = function(){
+  const mu=get('nm_m'), sigma=get('nm_s'), x=get('nm_x');
+  const f=(1/(sigma*Math.sqrt(2*Math.PI)))*Math.exp(-0.5*Math.pow((x-mu)/sigma,2));
+  set('bn_res',result('Плотность f(x)',f.toFixed(6)));
+  const c=document.getElementById('nm_can'), ctx=c.getContext('2d'), w=c.width, h=c.height;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--kimi-color-border'); ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(0,h-20); ctx.lineTo(w,h-20); ctx.stroke();
+  ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--kimi-chart-1'); ctx.lineWidth=2;
+  ctx.beginPath();
+  for(let px=0;px<w;px++){
+    const xv=mu-4*sigma+(8*sigma*px/w);
+    const yv=(1/(sigma*Math.sqrt(2*Math.PI)))*Math.exp(-0.5*Math.pow((xv-mu)/sigma,2));
+    const py=h-20-yv*(h-40)/(1/(sigma*Math.sqrt(2*Math.PI)));
+    if(px===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+  }
+  ctx.stroke();
+};
+window.calcStat = function(){
+  const arr=getv('st_v').split(',').map(Number).filter(n=>!isNaN(n)); if(!arr.length){set('st_res',result('Ошибка','Введите числа'));return;}
+  const mean=arr.reduce((a,b)=>a+b,0)/arr.length;
+  const sorted=[...arr].sort((a,b)=>a-b); const mid=Math.floor(sorted.length/2);
+  const median=sorted.length%2?sorted[mid]:(sorted[mid-1]+sorted[mid])/2;
+  const variance=arr.reduce((s,x)=>s+(x-mean)*(x-mean),0)/arr.length;
+  set('st_res',result('Статистика','Среднее: '+mean.toFixed(4)+'<br>Медиана: '+median+'<br>Дисперсия: '+variance.toFixed(4)+'<br>Макс: '+Math.max(...arr)+'<br>Мин: '+Math.min(...arr)));
+};
+window.drawTree = function(){
+  const pa=get('tr_pa'), pba=get('tr_pba'), pnba=get('tr_pnba');
+  const c=document.getElementById('tr_can'), ctx=c.getContext('2d'), w=c.width, h=c.height;
+  ctx.clearRect(0,0,w,h); ctx.font='13px sans-serif'; ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--kimi-color-text-primary');
+  ctx.fillText('A: '+pa,20,30); ctx.fillText('¬A: '+(1-pa).toFixed(3),20,70);
+  ctx.fillText('B|A: '+pba,120,20); ctx.fillText('¬B|A: '+(1-pba).toFixed(3),120,40);
+  ctx.fillText('B|¬A: '+pnba,120,60); ctx.fillText('¬B|¬A: '+(1-pnba).toFixed(3),120,80);
+  ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--kimi-color-border');
+  ctx.beginPath(); ctx.moveTo(80,25); ctx.lineTo(110,25); ctx.moveTo(80,25); ctx.lineTo(110,35);
+  ctx.moveTo(80,65); ctx.lineTo(110,65); ctx.moveTo(80,65); ctx.lineTo(110,75); ctx.stroke();
+  ctx.fillText('P(B) = '+(pa*pba+(1-pa)*pnba).toFixed(4),260,50);
+};
+window.calcExp = function(){
+  const xs=getv('ex_x').split(',').map(Number), ps=getv('ex_p').split(',').map(Number);
+  if(xs.length!==ps.length||Math.abs(ps.reduce((a,b)=>a+b,0)-1)>0.01){set('ex_res',result('Ошибка','Сумма вероятностей должна быть 1'));return;}
+  const ex=xs.reduce((s,x,i)=>s+x*ps[i],0), ex2=xs.reduce((s,x,i)=>s+x*x*ps[i],0), dx=ex2-ex*ex;
+  set('ex_res',result('Результаты','E[X] = '+ex.toFixed(4)+'<br>D[X] = '+dx.toFixed(4)+'<br>σ = '+Math.sqrt(dx).toFixed(4)));
+};
+window.calcFreq = function(){ const m=get('fr_m'),n=get('fr_n'); if(!n){set('fr_res',result('Ошибка','n=0'));return;} set('fr_res',result('Относительная частота',(m/n).toFixed(6))); };
+window.calcRand = function(){
+  const a=Math.round(get('rnd_a')),b=Math.round(get('rnd_b')),c=Math.round(get('rnd_c'));
+  const res=[]; for(let i=0;i<c;i++) res.push(Math.floor(Math.random()*(b-a+1))+a);
+  set('rnd_res',result('Случайные числа',res.join(', ')));
+};
+window.drawWalk = function(){
+  const n=get('wk_n'), c=document.getElementById('wk_can'), ctx=c.getContext('2d'), w=c.width, h=c.height;
+  ctx.clearRect(0,0,w,h); let x=w/2,y=h/2;
+  ctx.strokeStyle=getComputedStyle(document.body).getPropertyValue('--kimi-chart-1'); ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.moveTo(x,y);
+  for(let i=0;i<n;i++){ const dir=Math.floor(Math.random()*4); if(dir===0)x+=3; else if(dir===1)x-=3; else if(dir===2)y+=3; else y-=3; ctx.lineTo(x,y); }
+  ctx.stroke();
+};
+window.calcBayes = function(){
+  const pa=get('by_pa'), pba=get('by_pba'), pnba=get('by_pnba');
+  const pb=pa*pba+(1-pa)*pnba; if(!pb){set('by_res',result('Ошибка','P(B)=0'));return;}
+  const res=(pa*pba)/pb; set('by_res',result('P(A|B)',res.toFixed(6)));
+};
+window.calcUniform = function(){
+  const a=get('un_a'),b=get('un_b'),x=get('un_x');
+  const f=(x>=a&&x<=b)?(1/(b-a)):0; set('un_res',result('f(x)',f.toFixed(6),'На ['+a+','+b+']'));
+};
+
+// Physics
+window.calcOhm = function(){
+  const u=get('oh_u'),i=get('oh_i'),r=get('oh_r'),p=get('oh_p'); let txt='';
+  if(u&&i){txt='R = '+(u/i).toFixed(3)+' Ом<br>P = '+(u*i).toFixed(3)+' Вт';} else if(u&&r){txt='I = '+(u/r).toFixed(3)+' А<br>P = '+(u*u/r).toFixed(3)+' Вт';} else if(i&&r){txt='U = '+(i*r).toFixed(3)+' В<br>P = '+(i*i*r).toFixed(3)+' Вт';} else if(p&&u){txt='I = '+(p/u).toFixed(3)+' А<br>R = '+(u*u/p).toFixed(3)+' Ом';} else if(p&&i){txt='U = '+(p/i).toFixed(3)+' В<br>R = '+(p/(i*i)).toFixed(3)+' Ом';} else if(p&&r){txt='U = '+(Math.sqrt(p*r)).toFixed(3)+' В<br>I = '+(Math.sqrt(p/r)).toFixed(3)+' А';} else {txt='Заполните ровно 2 поля';}
+  set('oh_res',result('Результат',txt));
+};
+window.calcEnergy = function(){
+  const w=document.getElementById('en_w').value, m=get('en_m'),v=get('en_v'),g=get('en_g');
+  if(w==='ke') set('en_res',result('Кинетическая энергия',(0.5*m*v*v).toFixed(3)+' Дж')); else set('en_res',result('Потенциальная энергия',(m*g*v).toFixed(3)+' Дж'));
+};
+window.calcKinem = function(){
+  const w=document.getElementById('kn_w').value, v0=get('kn_v0'),a=get('kn_a'),t=get('kn_t');
+  let txt; switch(w){case's':txt='s = '+(v0*t+0.5*a*t*t).toFixed(3)+' м';break;case'v':txt='v = '+(v0+a*t).toFixed(3)+' м/с';break;case't':txt='t = '+((t-v0)/a).toFixed(3)+' с';break;}
+  set('kn_res',result('Результат',txt));
+};
+window.calcConvert = function(){
+  const f=document.getElementById('cv_f').value, t=document.getElementById('cv_t').value, v=get('cv_v'); let r;
+  if(f===t) r=v; else if(f==='m'&&t==='km') r=v/1000; else if(f==='km'&&t==='m') r=v*1000;
+  else if(f==='kg'&&t==='g') r=v*1000; else if(f==='g'&&t==='kg') r=v/1000;
+  else if(f==='c'&&t==='f') r=v*9/5+32; else if(f==='f'&&t==='c') r=(v-32)*5/9;
+  else r='Конвертация недоступна';
+  set('cv_res',result('Результат',typeof r==='number'?r.toFixed(4):r));
+};
+window.calcPend = function(){ const l=get('pen_l'),g=get('pen_g'); set('pen_res',result('Период T',(2*Math.PI*Math.sqrt(l/g)).toFixed(4)+' с')); };
+window.calcGravity = function(){
+  const G=6.674e-11,m1=get('gr_m1'),m2=get('gr_m2'),r=get('gr_r');
+  set('gr_res',result('Сила F',(G*m1*m2/(r*r)).toExponential(3)+' Н'));
+};
+window.calcPressure = function(){ const rho=get('pr_rho'),h=get('pr_h'),g=get('pr_g'); set('prs_res',result('Давление P',(rho*g*h).toFixed(3)+' Па')); };
+window.calcDensity = function(){ const m=get('den_m'),V=get('den_v'); set('den_res',result('Плотность ρ',(m/V).toFixed(4)+' кг/м³')); };
+window.calcWork = function(){ const F=get('wr_f'),s=get('wr_s'),t=get('wr_t'); set('wr_res',result('Результаты','A = '+(F*s).toFixed(3)+' Дж<br>N = '+(F*s/t).toFixed(3)+' Вт')); };
+window.calcWave = function(){
+  const v=get('wv_v'),f=get('wv_f'),l=get('wv_l'); let txt;
+  if(v&&f) txt='λ = '+(v/f).toFixed(4)+' м'; else if(v&&l) txt='f = '+(v/l).toFixed(4)+' Гц'; else if(f&&l) txt='v = '+(f*l).toFixed(4)+' м/с'; else txt='Введите 2 значения';
+  set('wv_res',result('Результат',txt));
+};
+window.calcMirror = function(){ const R=get('mi_r'); set('mi_res',result('Фокусное расстояние F',(R/2).toFixed(4)+' м')); };
+window.calcResist = function(){ const rho=get('rs_rho'),L=get('rs_l'),S=get('rs_s'); set('rs_res',result('Сопротивление R',(rho*L/S).toFixed(4)+' Ом')); };
+window.calcCapac = function(){ const Q=get('cap_q'),U=get('cap_u'); set('cap_res',result('Ёмкость C',(Q/U).toFixed(6)+' Ф')); };
+window.calcLens = function(){ const d=get('le_d'),f=get('le_f'); if(!d||!f){set('le_res',result('Ошибка','Заполните оба поля'));return;} const F=1/(1/d+1/f); set('le_res',result('Фокусное расстояние F',F.toFixed(4)+' м')); };
+window.calcHeat = function(){ const m=get('ht_m'),c=get('ht_c'),dt=get('ht_dt'); set('ht_res',result('Количество теплоты Q',(m*c*dt).toFixed(3)+' Дж')); };
+
+// Informatics
+window.calcNS = function(){
+  const num=getv('ns_num'), from=parseInt(document.getElementById('ns_from').value), to=parseInt(document.getElementById('ns_to').value);
+  let dec; try{ dec=parseInt(num,from); }catch(e){set('ns_res',result('Ошибка','Неверное число'));return;}
+  let res; switch(to){case 2:res=dec.toString(2);break;case 8:res=dec.toString(8);break;case 10:res=dec.toString(10);break;case 16:res=dec.toString(16).toUpperCase();break;}
+  set('ns_res',result('Результат',res));
+};
+window.calcInfo = function(){
+  const v=get('ib_v'), u=document.getElementById('ib_u').value;
+  let bits; switch(u){case'b':bits=v;break;case'B':bits=v*8;break;case'KB':bits=v*8*1024;break;case'MB':bits=v*8*1024*1024;break;case'GB':bits=v*8*1024*1024*1024;break;}
+  set('ib_res',result('Результат','бит: '+bits+'<br>байт: '+(bits/8)+'<br>КБ: '+(bits/8/1024).toFixed(4)+'<br>МБ: '+(bits/8/1024/1024).toFixed(6)+'<br>ГБ: '+(bits/8/1024/1024/1024).toFixed(9)));
+};
+window.calcLogic = function(){
+  const op=document.getElementById('lo_op').value, a=get('lo_a'), b=get('lo_b'); let r;
+  switch(op){case'and':r=a&&b;break;case'or':r=a||b;break;case'not':r=!a;break;case'xor':r=!!(a^b);break;}
+  set('lo_res',result('Результат',r?'1 (истина)':'0 (ложь)'));
+};
+window.calcTT = function(){
+  const e=document.getElementById('tt_e').value;
+  let html='<table style="width:100%;border-collapse:collapse;font-size:13px"><tr style="border-bottom:1px solid var(--kimi-color-border)"><th style="padding:6px">A</th><th style="padding:6px">B</th><th style="padding:6px">Результат</th></tr>';
+  const rows=[[0,0],[0,1],[1,0],[1,1]];
+  rows.forEach(([a,b])=>{
+    let r; switch(e){case'and':r=a&&b;break;case'or':r=a||b;break;case'impl':r=!a||b;break;case'eq':r=a===b;break;}
+    html+=`<tr style="border-bottom:1px solid var(--kimi-color-border)"><td style="padding:6px;text-align:center">${a}</td><td style="padding:6px;text-align:center">${b}</td><td style="padding:6px;text-align:center;font-weight:500">${r?1:0}</td></tr>`;
+  });
+  html+='</table>'; set('tt_res',html);
+};
+window.calcASCII = function(){
+  const t=getv('ct_t'); const codes=t.split('').map(c=>c.charCodeAt(0)).join(' ');
+  set('ct_res',result('ASCII-коды',codes));
+};
+window.calcIP = function(){
+  const ip=getv('ip_a').split('.'), mask=getv('ip_m').split('.');
+  if(ip.length!==4||mask.length!==4){set('ip_res',result('Ошибка','Неверный формат'));return;}
+  const net=ip.map((o,i)=>o&mask[i]).join('.');
+  set('ip_res',result('Адрес сети',net));
+};
+window.calcCaesar = function(){
+  const t=getv('cz_t'), s=Math.round(get('cz_s')), d=document.getElementById('cz_d').value;
+  const shift = d==='enc'?s:-s;
+  const res = t.split('').map(c=>{
+    const code=c.charCodeAt(0);
+    if(code>=65&&code<=90) return String.fromCharCode((code-65+shift+26)%26+65);
+    if(code>=97&&code<=122) return String.fromCharCode((code-97+shift+26)%26+97);
+    if(code>=1040&&code<=1071) return String.fromCharCode((code-1040+shift+32)%32+1040);
+    if(code>=1072&&code<=1103) return String.fromCharCode((code-1072+shift+32)%32+1072);
+    return c;
+  }).join('');
+  set('cz_res',result('Результат',res));
+};
+window.calcBinSum = function(){
+  const a=getv('bs_a'), b=getv('bs_b');
+  try{ const sum=(parseInt(a,2)+parseInt(b,2)).toString(2); set('bs_res',result('Сумма',sum+' (десятичное: '+(parseInt(a,2)+parseInt(b,2))+')')); }catch(e){set('bs_res',result('Ошибка','Неверное двоичное число'));}
+};
+window.calcTC = function(){
+  const n=get('tc_n');
+  set('tc_res',result('Оценка','O(1): 1 операция<br>O(log n): '+(Math.log2(n)|0)+'<br>O(n): '+n+'<br>O(n²): '+(n*n)+'<br>O(2ⁿ): очень много'));
+};
+</script>
+</body>
+</html>
